@@ -4,10 +4,13 @@ namespace Retempo2
 {
     public partial class BeatmapEditor : Form
     {
+        public AudioStream aStream;
+
         public BeatmapEditor()
         {
             InitializeComponent();
             Version.ConvertForm(this);
+            aStream = new AudioStream();
         }
 
         private void BeatmapEditor_Load(object sender, EventArgs e)
