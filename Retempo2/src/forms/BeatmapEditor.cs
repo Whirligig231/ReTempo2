@@ -35,6 +35,10 @@ namespace Retempo2
             if (fname == null)
                 return;
             audioFileSamples = AudioFileLoad.LoadMFRFile(fname);
+            if (audioFileSamples == null)
+                return;
+            SimpleArrayGenerator sag = new SimpleArrayGenerator(audioFileSamples);
+            aStream.SetCallback(sag.Callback);
         }
     }
 }
