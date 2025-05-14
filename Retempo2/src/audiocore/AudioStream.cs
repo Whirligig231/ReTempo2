@@ -13,23 +13,58 @@ namespace Retempo2
 		private float bufferLength;
 
 		private float[] circleBuffer;
-		private int bufferIndex; // Index of a single float in the circular buffer
-		private long frameIndex; // Index of the frame in the linear stream
+		private int framesPerBlock;
+		private int bufferFrameIndex; // Index of the frame in the circular buffer
+		private long globalBlockIndex; // Index of the block in the linear stream
+
+        public delegate float[] GenerationCallback(double sampleRate, int channels, long startGlobalFrame, int framesPerBlock);
+		private GenerationCallback generationCallback;
 
 		private Stream stream;
+
+		private void Generate(int blockIndex)
+		{
+			long startGlobalFrame = globalBlockIndex * framesPerBlock;
+			float[] newBlock;
+			if (generationCallback != null)
+				newBlock = generationCallback(sampleRate, channels, startGlobalFrame, framesPerBlock);
+			else
+				newBlock = new float[framesPerBlock * channels]; // TODO: Trip an error
+
+			int startIndex = blockIndex * framesPerBlock * channels;
+			int endIndex = (blockIndex + 1) * framesPerBlock * channels;
+			Array.Copy(newBlock, 0, circleBuffer, startIndex, endIndex - startIndex);
+			globalBlockIndex++;
+        }
 
 		private StreamCallbackResult CircularBufferCallback(IntPtr input, IntPtr output, UInt32 frameCount,
 			ref StreamCallbackTimeInfo timeInfo, StreamCallbackFlags statusFlags, IntPtr userData)
 		{
-			float[] temp = new float[frameCount * channels];
-			for (int i = 0; i < frameCount; i++)
+			int currentBlockIndex = (bufferFrameIndex / framesPerBlock);
+			int newBufferFrameIndex = (int)(bufferFrameIndex + frameCount);
+			
+			if (newBufferFrameIndex >= framesPerBlock * 4)
 			{
-				for (int j = 0; j < channels; j++)
-				{
-					temp[i * channels + j] = MathF.Sin((float)(i * channels) / (float)(sampleRate) * 440.0f * 2.0f * MathF.PI) / 10.0f;
-				}
+				// We have to loop, so we do two copies
+				int floatsAddedFirst = (framesPerBlock * 4 - bufferFrameIndex) * channels;
+                Marshal.Copy(circleBuffer, bufferFrameIndex * channels, output, floatsAddedFirst);
+				newBufferFrameIndex -= framesPerBlock * 4;
+                Marshal.Copy(circleBuffer, 0, IntPtr.Add(output, floatsAddedFirst * sizeof(float)), newBufferFrameIndex * channels);
+            }
+			else
+			{
+                Marshal.Copy(circleBuffer, bufferFrameIndex * channels, output, (newBufferFrameIndex - bufferFrameIndex) * channels);
+            }
+
+			int newBlockIndex = (newBufferFrameIndex / framesPerBlock);
+			bufferFrameIndex = newBufferFrameIndex;
+
+			if (newBlockIndex != currentBlockIndex)
+			{
+				// We're done with the current block, we can regenerate it
+				Generate(currentBlockIndex);
 			}
-            Marshal.Copy(temp, 0, output, (int)(frameCount * channels));
+
 			return StreamCallbackResult.Continue;
 		}
 
@@ -57,11 +92,50 @@ namespace Retempo2
 			parameters.sampleFormat = SampleFormat.Float32;
 			parameters.suggestedLatency = deviceInfo.defaultLowOutputLatency;
 
+			framesPerBlock = (int)Math.Ceiling(sampleRate * bufferLength / 4.0);
+			circleBuffer = new float[4 * framesPerBlock * channels];
+
+			generationCallback = TestCallback;
+
 			Stream.Callback callback = CircularBufferCallback;
 
 			stream = new Stream(inParams: null, outParams: parameters, sampleRate: sampleRate,
 				framesPerBuffer: 0, streamFlags: StreamFlags.NoFlag, callback: callback, userData: IntPtr.Zero);
-			stream.Start();
 		}
-	}
+
+		public void SetCallback(GenerationCallback callback)
+		{
+			generationCallback = callback;
+		}
+
+		public void Play()
+        {
+			if (stream.IsActive)
+				stream.Stop();
+			globalBlockIndex = 0;
+            bufferFrameIndex = 0;
+            for (int i = 0; i < 4; i++)
+                Generate(i);
+            stream.Start();
+        }
+
+        public void Stop()
+        {
+			stream.Stop();
+        }
+
+		private float[] TestCallback(double sampleRate, int channels, long startGlobalFrame, int framesPerBlock)
+		{
+			int frameNumber = (int)(startGlobalFrame / 11025 + 1);
+			float[] output = new float[framesPerBlock * channels];
+			for (int i = 0; i < framesPerBlock; i++)
+			{
+				for (int j = 0; j < channels; j++)
+				{
+					output[i * channels + j] = 0.05f * (float)Math.Sin((double)(i) / sampleRate * 110.0 * frameNumber * 2.0 * Math.PI);
+				}
+			}
+			return output;
+		}
+    }
 }

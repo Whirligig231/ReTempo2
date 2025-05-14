@@ -15,12 +15,17 @@ namespace Retempo2
 
         private void BeatmapEditor_Load(object sender, EventArgs e)
         {
-            
+
         }
 
         private void PlayButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(PortAudio.VersionInfo.versionText);
+            aStream.Play();
+        }
+
+        private void StopButton_Click(object sender, EventArgs e)
+        {
+            aStream.Stop();
         }
     }
 }

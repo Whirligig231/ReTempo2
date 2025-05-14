@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             PlayButton = new Button();
+            StopButton = new Button();
             SuspendLayout();
             // 
             // PlayButton
@@ -42,11 +43,23 @@
             PlayButton.UseVisualStyleBackColor = true;
             PlayButton.Click += PlayButton_Click;
             // 
+            // StopButton
+            // 
+            StopButton.Anchor = AnchorStyles.None;
+            StopButton.Location = new Point(264, 238);
+            StopButton.Name = "StopButton";
+            StopButton.Size = new Size(96, 24);
+            StopButton.TabIndex = 1;
+            StopButton.Text = "Stop Sound";
+            StopButton.UseVisualStyleBackColor = true;
+            StopButton.Click += StopButton_Click;
+            // 
             // BeatmapEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 441);
+            Controls.Add(StopButton);
             Controls.Add(PlayButton);
             Name = "BeatmapEditor";
             Text = "Retempo 2 {VERSION} - Beatmap Editor";
@@ -57,5 +70,6 @@
         #endregion
 
         private Button PlayButton;
+        private Button StopButton;
     }
 }
