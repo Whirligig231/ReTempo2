@@ -14,17 +14,17 @@
             float[] output = new float[framesPerBlock * channels];
             int totalAudioFrames = samples.Length / channels;
             int startAudioFrame = (int)(startGlobalFrame % totalAudioFrames);
-            
-            if (startAudioFrame + framesPerBlock >= totalAudioFrames)
+
+            int outputStart = 0;
+
+            while (startAudioFrame + framesPerBlock >= totalAudioFrames)
             {
-                Array.Copy(samples, startAudioFrame * channels, output, 0, (totalAudioFrames - startAudioFrame) * channels);
+                Array.Copy(samples, startAudioFrame * channels, output, outputStart, (totalAudioFrames - startAudioFrame) * channels);
                 framesPerBlock -= (totalAudioFrames - startAudioFrame);
-                Array.Copy(samples, 0, output, (totalAudioFrames - startAudioFrame) * channels, framesPerBlock * channels);
+                outputStart += (totalAudioFrames - startAudioFrame) * channels;
+                startAudioFrame = 0;
             }
-            else
-            {
-                Array.Copy(samples, startAudioFrame * channels, output, 0, framesPerBlock * channels);
-            }
+            Array.Copy(samples, startAudioFrame * channels, output, outputStart, framesPerBlock * channels);
 
             return output;
         }
