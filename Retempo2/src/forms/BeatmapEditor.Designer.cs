@@ -30,6 +30,7 @@
         {
             PlayButton = new Button();
             StopButton = new Button();
+            OpenButton = new Button();
             SuspendLayout();
             // 
             // PlayButton
@@ -54,11 +55,23 @@
             StopButton.UseVisualStyleBackColor = true;
             StopButton.Click += StopButton_Click;
             // 
+            // OpenButton
+            // 
+            OpenButton.Anchor = AnchorStyles.None;
+            OpenButton.Location = new Point(264, 178);
+            OpenButton.Name = "OpenButton";
+            OpenButton.Size = new Size(96, 24);
+            OpenButton.TabIndex = 2;
+            OpenButton.Text = "Open File";
+            OpenButton.UseVisualStyleBackColor = true;
+            OpenButton.Click += OpenButton_Click;
+            // 
             // BeatmapEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 441);
+            Controls.Add(OpenButton);
             Controls.Add(StopButton);
             Controls.Add(PlayButton);
             Name = "BeatmapEditor";
@@ -71,5 +84,6 @@
 
         private Button PlayButton;
         private Button StopButton;
+        private Button OpenButton;
     }
 }

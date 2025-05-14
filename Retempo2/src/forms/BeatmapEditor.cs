@@ -27,5 +27,11 @@ namespace Retempo2
         {
             aStream.Stop();
         }
+
+        private void OpenButton_Click(object sender, EventArgs e)
+        {
+            string? fname = DialogSupport.GetAudioFname();
+            MessageBox.Show(fname);
+        }
     }
 }
