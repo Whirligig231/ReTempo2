@@ -1,3 +1,5 @@
+using PortAudioSharp;
+
 namespace Retempo2
 {
     public partial class BeatmapEditor : Form
@@ -5,16 +7,17 @@ namespace Retempo2
         public BeatmapEditor()
         {
             InitializeComponent();
+            Version.ConvertForm(this);
         }
 
         private void BeatmapEditor_Load(object sender, EventArgs e)
         {
-
+            
         }
 
         private void PlayButton_Click(object sender, EventArgs e)
         {
-            System.Media.SystemSounds.Hand.Play();
+            MessageBox.Show(PortAudio.VersionInfo.versionText);
         }
     }
 }
