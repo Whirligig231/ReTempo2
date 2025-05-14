@@ -95,7 +95,7 @@ namespace Retempo2
 			framesPerBlock = (int)Math.Ceiling(sampleRate * bufferLength / 4.0);
 			circleBuffer = new float[4 * framesPerBlock * channels];
 
-			generationCallback = TestCallback;
+			generationCallback = DefaultCallback;
 
 			Stream.Callback callback = CircularBufferCallback;
 
@@ -121,20 +121,13 @@ namespace Retempo2
 
         public void Stop()
         {
-			stream.Stop();
+            if (stream.IsActive)
+                stream.Stop();
         }
 
-		private float[] TestCallback(double sampleRate, int channels, long startGlobalFrame, int framesPerBlock)
+		private float[] DefaultCallback(double sampleRate, int channels, long startGlobalFrame, int framesPerBlock)
 		{
-			int frameNumber = (int)(startGlobalFrame / 11025 + 1);
-			float[] output = new float[framesPerBlock * channels];
-			for (int i = 0; i < framesPerBlock; i++)
-			{
-				for (int j = 0; j < channels; j++)
-				{
-					output[i * channels + j] = 0.05f * (float)Math.Sin((double)(i) / sampleRate * 110.0 * frameNumber * 2.0 * Math.PI);
-				}
-			}
+			float[] output = new float[framesPerBlock * channels]; // Silent buffer
 			return output;
 		}
     }
