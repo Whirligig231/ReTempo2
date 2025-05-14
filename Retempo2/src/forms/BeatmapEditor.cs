@@ -4,7 +4,8 @@ namespace Retempo2
 {
     public partial class BeatmapEditor : Form
     {
-        public AudioStream aStream;
+        private AudioStream aStream;
+        private float[]? audioFileSamples;
 
         public BeatmapEditor()
         {
@@ -31,7 +32,9 @@ namespace Retempo2
         private void OpenButton_Click(object sender, EventArgs e)
         {
             string? fname = DialogSupport.GetAudioFname();
-            MessageBox.Show(fname);
+            if (fname == null)
+                return;
+            audioFileSamples = AudioFileLoad.LoadMFRFile(fname);
         }
     }
 }
