@@ -76,6 +76,7 @@
             AudioVis.TabIndex = 3;
             AudioVis.TabStop = false;
             AudioVis.Paint += AudioVis_Paint;
+            AudioVis.Resize += AudioVis_Resize;
             // 
             // BeatmapEditor
             // 

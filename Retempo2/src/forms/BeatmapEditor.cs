@@ -55,5 +55,10 @@ namespace Retempo2
             if (audioFileSamples != null)
                 WaveformDrawing.DrawWaveform(g, b, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, 2);
         }
+
+        private void AudioVis_Resize(object sender, EventArgs e)
+        {
+            AudioVis.Refresh();
+        }
     }
 }
