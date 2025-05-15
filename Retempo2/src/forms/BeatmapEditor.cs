@@ -1,4 +1,5 @@
 using PortAudioSharp;
+using Timer = System.Windows.Forms.Timer;
 
 namespace Retempo2
 {
@@ -7,7 +8,8 @@ namespace Retempo2
         private AudioStream aStream;
         private float[]? audioFileSamples;
         private EfficientMinMax audioDataEmm;
-        private int startFrame, numFrames;
+        private int startFrame, numFrames; // In the current window
+        private Timer playTimer;
 
         public BeatmapEditor()
         {
@@ -15,6 +17,10 @@ namespace Retempo2
             Version.ConvertForm(this);
             aStream = new AudioStream();
             AudioVisScroll.Maximum = 0;
+
+            playTimer = new Timer();
+            playTimer.Interval = 50;
+            playTimer.Tick += PlayTimer_Tick;
         }
 
         private void BeatmapEditor_Load(object sender, EventArgs e)
@@ -25,11 +31,14 @@ namespace Retempo2
         private void PlayButton_Click(object sender, EventArgs e)
         {
             aStream.Play();
+            playTimer.Start();
         }
 
         private void StopButton_Click(object sender, EventArgs e)
         {
             aStream.Stop();
+            playTimer.Stop();
+            AudioVis.Refresh();
         }
 
         private void OpenButton_Click(object sender, EventArgs e)
@@ -55,9 +64,22 @@ namespace Retempo2
         private void AudioVis_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            Brush b = new SolidBrush(Color.Blue);
+            Brush blue = new SolidBrush(Color.Blue);
             if (audioFileSamples != null)
-                WaveformDrawing.DrawWaveform(g, b, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, startFrame, numFrames);
+                WaveformDrawing.DrawWaveform(g, blue, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, startFrame, numFrames);
+
+            if (aStream.IsPlaying() && audioDataEmm != null)
+            {
+                Brush green = new SolidBrush(Color.Green);
+                Pen greenPen = new Pen(green);
+                int currentFrame = (int)(aStream.NumFramesPlayed() % audioDataEmm.GetLength());
+                if (currentFrame >= startFrame && currentFrame < startFrame + numFrames)
+                {
+                    float frac = (float)(currentFrame - startFrame) / numFrames;
+                    int fracPixel = (int)MathF.Floor(frac * AudioVis.Width);
+                    g.DrawLine(greenPen, fracPixel, 0, fracPixel, AudioVis.Height);
+                }
+            }
         }
 
         private void AudioVis_Resize(object sender, EventArgs e)
@@ -99,6 +121,11 @@ namespace Retempo2
             startFrame = e.NewValue;
             if (startFrame + numFrames >= audioDataEmm.GetLength())
                 startFrame = audioDataEmm.GetLength() - numFrames;
+            AudioVis.Refresh();
+        }
+
+        private void PlayTimer_Tick(object sender, EventArgs e)
+        {
             AudioVis.Refresh();
         }
     }

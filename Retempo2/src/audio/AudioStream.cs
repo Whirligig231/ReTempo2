@@ -17,6 +17,8 @@ namespace Retempo2
 		private int bufferFrameIndex; // Index of the frame in the circular buffer
 		private long globalBlockIndex; // Index of the block in the linear stream
 
+		private long totalFramesPassed;
+
         public delegate float[] GenerationCallback(double sampleRate, int channels, long startGlobalFrame, int framesPerBlock);
 		private GenerationCallback generationCallback;
 
@@ -65,7 +67,8 @@ namespace Retempo2
 				Generate(currentBlockIndex);
 			}
 
-			return StreamCallbackResult.Continue;
+			totalFramesPassed += frameCount;
+            return StreamCallbackResult.Continue;
 		}
 
 		public AudioStream(float bufferLength = 1.0f)
@@ -114,6 +117,7 @@ namespace Retempo2
 				stream.Stop();
 			globalBlockIndex = 0;
             bufferFrameIndex = 0;
+			totalFramesPassed = 0;
             for (int i = 0; i < 4; i++)
                 Generate(i);
             stream.Start();
@@ -130,5 +134,15 @@ namespace Retempo2
 			float[] output = new float[framesPerBlock * channels]; // Silent buffer
 			return output;
 		}
+
+		public bool IsPlaying()
+		{
+			return stream.IsActive;
+		}
+
+		public long NumFramesPlayed()
+		{
+			return totalFramesPassed;
+        }
     }
 }
