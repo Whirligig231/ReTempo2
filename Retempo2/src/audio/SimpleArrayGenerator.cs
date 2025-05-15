@@ -4,6 +4,8 @@
     {
         private float[] samples;
 
+        public int playheadStartFrame;
+
         public SimpleArrayGenerator(float[] sampleArray)
         {
             samples = sampleArray;
@@ -13,7 +15,7 @@
         {
             float[] output = new float[framesPerBlock * channels];
             int totalAudioFrames = samples.Length / channels;
-            int startAudioFrame = (int)(startGlobalFrame % totalAudioFrames);
+            int startAudioFrame = (int)((startGlobalFrame + playheadStartFrame) % totalAudioFrames);
 
             int outputStart = 0;
 

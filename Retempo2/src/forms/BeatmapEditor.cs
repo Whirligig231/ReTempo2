@@ -8,6 +8,8 @@ namespace Retempo2
         private AudioStream aStream;
         private float[]? audioFileSamples;
         private EfficientMinMax audioDataEmm;
+        private SimpleArrayGenerator sag;
+        private int playhead; // Frame number of playhead
         private int startFrame, numFrames; // In the current window
         private Timer playTimer;
 
@@ -30,6 +32,7 @@ namespace Retempo2
 
         private void PlayButton_Click(object sender, EventArgs e)
         {
+            sag.playheadStartFrame = playhead;
             aStream.Play();
             playTimer.Start();
         }
@@ -57,8 +60,10 @@ namespace Retempo2
             numFrames = audioDataEmm.GetLength();
             AudioVis.Refresh();
             aStream.Stop();
-            SimpleArrayGenerator sag = new SimpleArrayGenerator(audioFileSamples);
+            sag = new SimpleArrayGenerator(audioFileSamples);
             aStream.SetCallback(sag.Callback);
+
+            playhead = 0;
         }
 
         private void AudioVis_Paint(object sender, PaintEventArgs e)
@@ -68,11 +73,25 @@ namespace Retempo2
             if (audioFileSamples != null)
                 WaveformDrawing.DrawWaveform(g, blue, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, startFrame, numFrames);
 
+            // Draw playhead (selected)
+            if (audioDataEmm != null)
+            {
+                Brush black = new SolidBrush(Color.Black);
+                Pen blackPen = new Pen(black);
+                if (playhead >= startFrame && playhead < startFrame + numFrames)
+                {
+                    float frac = (float)(playhead - startFrame) / numFrames;
+                    int fracPixel = (int)MathF.Floor(frac * AudioVis.Width);
+                    g.DrawLine(blackPen, fracPixel, 0, fracPixel, AudioVis.Height);
+                }
+            }
+
+            // Draw play line
             if (aStream.IsPlaying() && audioDataEmm != null)
             {
                 Brush green = new SolidBrush(Color.Green);
                 Pen greenPen = new Pen(green);
-                int currentFrame = (int)(aStream.NumFramesPlayed() % audioDataEmm.GetLength());
+                int currentFrame = (int)((aStream.NumFramesPlayed() + playhead) % audioDataEmm.GetLength());
                 if (currentFrame >= startFrame && currentFrame < startFrame + numFrames)
                 {
                     float frac = (float)(currentFrame - startFrame) / numFrames;
@@ -130,6 +149,17 @@ namespace Retempo2
 
         private void PlayTimer_Tick(object sender, EventArgs e)
         {
+            AudioVis.Refresh();
+        }
+
+        private void AudioVis_MouseClick(object sender, MouseEventArgs e)
+        {
+            // Get mouse X as a fraction
+            Control panel = AudioVis;
+            float xFrac = (float)(e.X) / panel.Width;
+            // Get the corresponding frame
+            playhead = (int)MathF.Floor(startFrame + numFrames * xFrac);
+
             AudioVis.Refresh();
         }
     }

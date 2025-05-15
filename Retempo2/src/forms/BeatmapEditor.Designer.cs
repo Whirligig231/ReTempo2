@@ -76,6 +76,7 @@
             AudioVis.Size = new Size(600, 200);
             AudioVis.TabIndex = 3;
             AudioVis.TabStop = false;
+            AudioVis.MouseClick += AudioVis_MouseClick;
             AudioVis.Paint += AudioVis_Paint;
             AudioVis.Resize += AudioVis_Resize;
             // 
