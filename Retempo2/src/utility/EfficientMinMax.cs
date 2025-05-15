@@ -133,5 +133,10 @@
         {
             return channelValues[0].Count;
         }
+
+        public int GetChannels()
+        {
+            return channelValues.Length;
+        }
     }
 }

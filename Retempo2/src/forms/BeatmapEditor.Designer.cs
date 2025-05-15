@@ -90,6 +90,7 @@
             Name = "BeatmapEditor";
             Text = "Retempo 2 {VERSION} - Beatmap Editor";
             Load += BeatmapEditor_Load;
+            MouseWheel += BeatmapEditor_MouseWheel;
             ((System.ComponentModel.ISupportInitialize)AudioVis).EndInit();
             ResumeLayout(false);
         }
