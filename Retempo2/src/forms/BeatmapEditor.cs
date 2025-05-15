@@ -6,6 +6,7 @@ namespace Retempo2
     {
         private AudioStream aStream;
         private float[]? audioFileSamples;
+        private EfficientMinMax audioDataEmm;
 
         public BeatmapEditor()
         {
@@ -35,9 +36,13 @@ namespace Retempo2
             if (fname == null)
                 return;
             audioFileSamples = AudioFileLoad.LoadMFRFile(fname);
-            AudioVis.Refresh();
             if (audioFileSamples == null)
+            {
+                AudioVis.Refresh();
                 return;
+            }
+            audioDataEmm = new EfficientMinMax(audioFileSamples, 2); // TODO: Support for other numbers of channels?
+            AudioVis.Refresh();
             aStream.Stop();
             SimpleArrayGenerator sag = new SimpleArrayGenerator(audioFileSamples);
             aStream.SetCallback(sag.Callback);
@@ -48,7 +53,7 @@ namespace Retempo2
             Graphics g = e.Graphics;
             Brush b = new SolidBrush(Color.Blue);
             if (audioFileSamples != null)
-                WaveformDrawing.DrawWaveform(g, b, 0, 0, AudioVis.Width, AudioVis.Height, audioFileSamples, 2);
+                WaveformDrawing.DrawWaveform(g, b, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, 2);
         }
     }
 }

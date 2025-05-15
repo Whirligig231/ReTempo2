@@ -5,7 +5,7 @@
         // TODO: Use memoization of some form to improve performance here. Unacceptably slow when resizing the window for a long song
         // Idea: store min/max for each channel and for each power-of-two grouping, as a sort of "mipmap"
         // This should only require linear extra storage and improve performance to logarithmic
-        public static void DrawWaveform(Graphics g, Brush b, int left, int top, int width, int height, float[] data, int channels)
+        public static void DrawWaveform(Graphics g, Brush b, int left, int top, int width, int height, EfficientMinMax emm, int channels)
         {
             int amplitude = height / 2 / channels;
 
@@ -14,23 +14,15 @@
                 bool[] hitMe = new bool[width];
                 int[] maxima = new int[width];
                 int[] minima = new int[width];
-                for (int i = 0; i < data.Length / channels; i++)
+
+                for (int xPos = 0; xPos < width; xPos++)
                 {
-                    int xPos = (int)MathF.Floor((float)i / (data.Length / channels) * width);
-                    int yPos = (int)MathF.Round(data[i * channels + c] * amplitude);
-                    if (!hitMe[xPos])
-                    {
-                        hitMe[xPos] = true;
-                        maxima[xPos] = yPos;
-                        minima[xPos] = yPos;
-                    }
-                    else
-                    {
-                        if (yPos > maxima[xPos])
-                            maxima[xPos] = yPos;
-                        if (yPos < minima[xPos])
-                            minima[xPos] = yPos;
-                    }
+                    int minI = (int)MathF.Floor((float)xPos / width * emm.GetLength());
+                    int maxI = (int)MathF.Floor((float)(xPos + 1) / width * emm.GetLength());
+                    float minVal = emm.FindMin(c, minI, maxI);
+                    float maxVal = emm.FindMax(c, minI, maxI);
+                    minima[xPos] = (int)MathF.Round(minVal * amplitude);
+                    maxima[xPos] = (int)MathF.Round(maxVal * amplitude);
                 }
 
                 List<PointF> points = new List<PointF>();
