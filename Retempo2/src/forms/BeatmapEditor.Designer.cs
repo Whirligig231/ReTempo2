@@ -31,6 +31,8 @@
             PlayButton = new Button();
             StopButton = new Button();
             OpenButton = new Button();
+            AudioVis = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)AudioVis).BeginInit();
             SuspendLayout();
             // 
             // PlayButton
@@ -65,18 +67,35 @@
             OpenButton.UseVisualStyleBackColor = true;
             OpenButton.Click += OpenButton_Click;
             // 
+            // AudioVis
+            // 
+            AudioVis.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            AudioVis.Location = new Point(12, 150);
+            AudioVis.Name = "AudioVis";
+            AudioVis.Size = new Size(600, 200);
+            AudioVis.TabIndex = 3;
+            AudioVis.TabStop = false;
+            AudioVis.Paint += AudioVis_Paint;
+            // 
             // BeatmapEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 441);
+            Controls.Add(AudioVis);
             Controls.Add(OpenButton);
             Controls.Add(StopButton);
             Controls.Add(PlayButton);
             Name = "BeatmapEditor";
             Text = "Retempo 2 {VERSION} - Beatmap Editor";
             Load += BeatmapEditor_Load;
+            ((System.ComponentModel.ISupportInitialize)AudioVis).EndInit();
             ResumeLayout(false);
+        }
+
+        private void AudioVis_Paint1(object sender, PaintEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -84,5 +103,6 @@
         private Button PlayButton;
         private Button StopButton;
         private Button OpenButton;
+        private PictureBox AudioVis;
     }
 }

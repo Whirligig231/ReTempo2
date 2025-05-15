@@ -35,11 +35,20 @@ namespace Retempo2
             if (fname == null)
                 return;
             audioFileSamples = AudioFileLoad.LoadMFRFile(fname);
+            AudioVis.Refresh();
             if (audioFileSamples == null)
                 return;
             aStream.Stop();
             SimpleArrayGenerator sag = new SimpleArrayGenerator(audioFileSamples);
             aStream.SetCallback(sag.Callback);
+        }
+
+        private void AudioVis_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            Brush b = new SolidBrush(Color.Blue);
+            if (audioFileSamples != null)
+                WaveformDrawing.DrawWaveform(g, b, 0, 0, AudioVis.Width, AudioVis.Height, audioFileSamples, 2);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace Retempo2
     {
         public static string Get()
         {
-            return "\u03B1.0.2";
+            return "\u03B1.0.3";
         }
 
         public static string ConvertString(string value)
