@@ -19,7 +19,7 @@ namespace Retempo2
             AudioVisScroll.Maximum = 0;
 
             playTimer = new Timer();
-            playTimer.Interval = 50;
+            playTimer.Interval = 5;
             playTimer.Tick += PlayTimer_Tick;
         }
 
