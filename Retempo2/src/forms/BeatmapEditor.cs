@@ -154,6 +154,9 @@ namespace Retempo2
 
         private void AudioVis_MouseClick(object sender, MouseEventArgs e)
         {
+            if (aStream.IsPlaying())
+                return;
+
             // Get mouse X as a fraction
             Control panel = AudioVis;
             float xFrac = (float)(e.X) / panel.Width;
