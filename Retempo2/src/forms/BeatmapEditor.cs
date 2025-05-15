@@ -1,3 +1,4 @@
+using System.Media;
 using PortAudioSharp;
 using Timer = System.Windows.Forms.Timer;
 
@@ -5,13 +6,38 @@ namespace Retempo2
 {
     public partial class BeatmapEditor : Form
     {
-        private AudioStream aStream;
-        private float[]? audioFileSamples;
-        private EfficientMinMax audioDataEmm;
-        private SimpleArrayGenerator sag;
+        private AudioStream aStream; // The internal audio stream
+        private float[]? audioFileSamples; // The audio data
+        private float[]? beatmap; // List of times of beats, in seconds
+        private EfficientMinMax? audioDataEmm; // Stores audio data for visuals
+        private SimpleArrayGenerator? sag; // Generates the audio stream
         private int playhead; // Frame number of playhead
         private int startFrame, numFrames; // In the current window
-        private Timer playTimer;
+
+        private Timer playTimer; // Timer to manage playback visuals and beat ticks
+        private int currentBeatmapIndex; // Position of the playhead in the beatmap
+        private int previousFrame; // Time of the previous frame
+        private SoundPlayer clickSound;
+
+        private const float sampleRate = 44100.0f; // TODO
+
+        private void PlayAudio()
+        {
+            if (sag == null)
+                return;
+            sag.playheadStartFrame = playhead;
+            previousFrame = playhead;
+            currentBeatmapIndex = 0;
+            aStream.Play();
+            playTimer.Start();
+        }
+
+        private void StopAudio()
+        {
+            aStream.Stop();
+            playTimer.Stop();
+            AudioVis.Refresh();
+        }
 
         public BeatmapEditor()
         {
@@ -23,6 +49,8 @@ namespace Retempo2
             playTimer = new Timer();
             playTimer.Interval = 20;
             playTimer.Tick += PlayTimer_Tick;
+
+            clickSound = new SoundPlayer(new MemoryStream(Properties.Resources.click));
         }
 
         private void BeatmapEditor_Load(object sender, EventArgs e)
@@ -32,16 +60,12 @@ namespace Retempo2
 
         private void PlayButton_Click(object sender, EventArgs e)
         {
-            sag.playheadStartFrame = playhead;
-            aStream.Play();
-            playTimer.Start();
+            PlayAudio();
         }
 
         private void StopButton_Click(object sender, EventArgs e)
         {
-            aStream.Stop();
-            playTimer.Stop();
-            AudioVis.Refresh();
+            StopAudio();
         }
 
         private void OpenButton_Click(object sender, EventArgs e)
@@ -55,23 +79,51 @@ namespace Retempo2
                 AudioVis.Refresh();
                 return;
             }
+            audioDataEmm = null;
+            AudioVis.Refresh();
             audioDataEmm = new EfficientMinMax(audioFileSamples, 2); // TODO: Support for other numbers of channels?
             startFrame = 0;
             numFrames = audioDataEmm.GetLength();
-            AudioVis.Refresh();
             aStream.Stop();
             sag = new SimpleArrayGenerator(audioFileSamples);
             aStream.SetCallback(sag.Callback);
 
             playhead = 0;
+
+            // Debug: generate a test beatmap
+            beatmap = [0.029f, 0.529f, 1.029f, 1.529f, 2.029f, 2.529f, 3.029f, 3.529f];
+
+            AudioVis.Refresh();
         }
 
         private void AudioVis_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+
+            // Draw waveform
             Brush blue = new SolidBrush(Color.Blue);
             if (audioFileSamples != null)
                 WaveformDrawing.DrawWaveform(g, blue, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, startFrame, numFrames);
+
+            // Draw beats
+            if (audioDataEmm != null && beatmap != null)
+            {
+                Brush red = new SolidBrush(Color.Red);
+                Pen redPen = new Pen(red);
+                for (int i = 0; i < beatmap.Length; i++)
+                {
+                    // TODO: What needs to change to support sample rates besides 44.1k?
+                    float frame = beatmap[i] * sampleRate;
+                    if (frame < startFrame)
+                        continue;
+                    if (frame >= startFrame + numFrames)
+                        break;
+
+                    float frac = (float)(frame - startFrame) / numFrames;
+                    int fracPixel = (int)MathF.Floor(frac * AudioVis.Width);
+                    g.DrawLine(redPen, fracPixel, 0, fracPixel, AudioVis.Height);
+                }
+            }
 
             // Draw playhead (selected)
             if (audioDataEmm != null)
@@ -141,6 +193,8 @@ namespace Retempo2
 
         private void AudioVisScroll_Scroll(object sender, ScrollEventArgs e)
         {
+            if (audioDataEmm == null)
+                return;
             startFrame = e.NewValue;
             if (startFrame + numFrames >= audioDataEmm.GetLength())
                 startFrame = audioDataEmm.GetLength() - numFrames;
@@ -150,18 +204,48 @@ namespace Retempo2
         private void PlayTimer_Tick(object sender, EventArgs e)
         {
             AudioVis.Refresh();
+
+            // Check for beat
+            if (audioDataEmm == null || beatmap == null)
+                return;
+            int currentFrame = (int)((aStream.NumFramesPlayed() + playhead) % audioDataEmm.GetLength());
+            while (currentBeatmapIndex < beatmap.Length && beatmap[currentBeatmapIndex] < (float)previousFrame / sampleRate)
+                currentBeatmapIndex++;
+            if (currentBeatmapIndex >= beatmap.Length)
+                return;
+            if (beatmap[currentBeatmapIndex] < (float)currentFrame / sampleRate)
+                clickSound.Play();
+            previousFrame = currentFrame;
         }
 
         private void AudioVis_MouseClick(object sender, MouseEventArgs e)
         {
-            if (aStream.IsPlaying())
-                return;
+            bool playing = aStream.IsPlaying();
+            if (playing)
+                StopAudio();
 
             // Get mouse X as a fraction
             Control panel = AudioVis;
             float xFrac = (float)(e.X) / panel.Width;
             // Get the corresponding frame
             playhead = (int)MathF.Floor(startFrame + numFrames * xFrac);
+
+            if (playing)
+                PlayAudio();
+
+            AudioVis.Refresh();
+        }
+
+        private void SeekStartButton_Click(object sender, EventArgs e)
+        {
+            bool playing = aStream.IsPlaying();
+            if (playing)
+                StopAudio();
+
+            playhead = 0;
+
+            if (playing)
+                PlayAudio();
 
             AudioVis.Refresh();
         }

@@ -5,8 +5,11 @@
         // TODO: Use memoization of some form to improve performance here. Unacceptably slow when resizing the window for a long song
         // Idea: store min/max for each channel and for each power-of-two grouping, as a sort of "mipmap"
         // This should only require linear extra storage and improve performance to logarithmic
-        public static void DrawWaveform(Graphics g, Brush b, int left, int top, int width, int height, EfficientMinMax emm, int startFrame, int frameCount)
+        public static void DrawWaveform(Graphics g, Brush b, int left, int top, int width, int height, EfficientMinMax? emm, int startFrame, int frameCount)
         {
+            if (emm == null)
+                return;
+
             int channels = emm.GetChannels();
             int amplitude = height / 2 / channels;
 

@@ -33,6 +33,7 @@
             OpenButton = new Button();
             AudioVis = new PictureBox();
             AudioVisScroll = new HScrollBar();
+            SeekStartButton = new Button();
             ((System.ComponentModel.ISupportInitialize)AudioVis).BeginInit();
             SuspendLayout();
             // 
@@ -76,8 +77,8 @@
             AudioVis.Size = new Size(600, 200);
             AudioVis.TabIndex = 3;
             AudioVis.TabStop = false;
-            AudioVis.MouseClick += AudioVis_MouseClick;
             AudioVis.Paint += AudioVis_Paint;
+            AudioVis.MouseClick += AudioVis_MouseClick;
             AudioVis.Resize += AudioVis_Resize;
             // 
             // AudioVisScroll
@@ -89,11 +90,23 @@
             AudioVisScroll.TabIndex = 4;
             AudioVisScroll.Scroll += AudioVisScroll_Scroll;
             // 
+            // SeekStartButton
+            // 
+            SeekStartButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            SeekStartButton.Image = Properties.Resources.seekstart;
+            SeekStartButton.Location = new Point(222, 12);
+            SeekStartButton.Name = "SeekStartButton";
+            SeekStartButton.Size = new Size(64, 64);
+            SeekStartButton.TabIndex = 3;
+            SeekStartButton.UseVisualStyleBackColor = true;
+            SeekStartButton.Click += SeekStartButton_Click;
+            // 
             // BeatmapEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 441);
+            Controls.Add(SeekStartButton);
             Controls.Add(AudioVisScroll);
             Controls.Add(AudioVis);
             Controls.Add(OpenButton);
@@ -119,5 +132,6 @@
         private Button OpenButton;
         private PictureBox AudioVis;
         private HScrollBar AudioVisScroll;
+        private Button SeekStartButton;
     }
 }

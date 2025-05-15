@@ -61,6 +61,16 @@ namespace Retempo2.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] click {
+            get {
+                object obj = ResourceManager.GetObject("click", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap open {
@@ -76,6 +86,16 @@ namespace Retempo2.Properties {
         internal static System.Drawing.Bitmap play {
             get {
                 object obj = ResourceManager.GetObject("play", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap seekstart {
+            get {
+                object obj = ResourceManager.GetObject("seekstart", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
