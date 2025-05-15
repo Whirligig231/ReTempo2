@@ -35,34 +35,33 @@
             // 
             // PlayButton
             // 
-            PlayButton.Anchor = AnchorStyles.None;
-            PlayButton.Location = new Point(264, 208);
+            PlayButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            PlayButton.Image = Properties.Resources.play;
+            PlayButton.Location = new Point(82, 12);
             PlayButton.Name = "PlayButton";
-            PlayButton.Size = new Size(96, 24);
-            PlayButton.TabIndex = 0;
-            PlayButton.Text = "Play Sound";
+            PlayButton.Size = new Size(64, 64);
+            PlayButton.TabIndex = 1;
             PlayButton.UseVisualStyleBackColor = true;
             PlayButton.Click += PlayButton_Click;
             // 
             // StopButton
             // 
-            StopButton.Anchor = AnchorStyles.None;
-            StopButton.Location = new Point(264, 238);
+            StopButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            StopButton.Image = Properties.Resources.stop;
+            StopButton.Location = new Point(152, 12);
             StopButton.Name = "StopButton";
-            StopButton.Size = new Size(96, 24);
-            StopButton.TabIndex = 1;
-            StopButton.Text = "Stop Sound";
+            StopButton.Size = new Size(64, 64);
+            StopButton.TabIndex = 2;
             StopButton.UseVisualStyleBackColor = true;
             StopButton.Click += StopButton_Click;
             // 
             // OpenButton
             // 
-            OpenButton.Anchor = AnchorStyles.None;
-            OpenButton.Location = new Point(264, 178);
+            OpenButton.Image = Properties.Resources.open;
+            OpenButton.Location = new Point(12, 12);
             OpenButton.Name = "OpenButton";
-            OpenButton.Size = new Size(96, 24);
-            OpenButton.TabIndex = 2;
-            OpenButton.Text = "Open File";
+            OpenButton.Size = new Size(64, 64);
+            OpenButton.TabIndex = 0;
             OpenButton.UseVisualStyleBackColor = true;
             OpenButton.Click += OpenButton_Click;
             // 
