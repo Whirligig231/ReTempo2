@@ -102,10 +102,14 @@ namespace Retempo2
             // Set the new start and numFrames
             int newStart = (int)MathF.Round(centerFrame + (startFrame - centerFrame) * zoomFac);
             int newEnd = (int)MathF.Round(centerFrame + (startFrame + numFrames - centerFrame) * zoomFac);
+            if (newEnd == newStart)
+                newEnd++;
             if (newStart < 0)
                 newStart = 0;
             if (newEnd > audioDataEmm.GetLength())
                 newEnd = audioDataEmm.GetLength();
+            if (newEnd == newStart)
+                newStart--;
             startFrame = newStart;
             numFrames = newEnd - newStart;
 
