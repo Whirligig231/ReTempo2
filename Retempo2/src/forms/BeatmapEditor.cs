@@ -14,6 +14,7 @@ namespace Retempo2
             InitializeComponent();
             Version.ConvertForm(this);
             aStream = new AudioStream();
+            AudioVisScroll.Maximum = 0;
         }
 
         private void BeatmapEditor_Load(object sender, EventArgs e)
@@ -86,6 +87,18 @@ namespace Retempo2
             startFrame = newStart;
             numFrames = newEnd - newStart;
 
+            AudioVis.Refresh();
+
+            AudioVisScroll.Maximum = audioDataEmm.GetLength();
+            AudioVisScroll.LargeChange = numFrames;
+            AudioVisScroll.Value = newStart;
+        }
+
+        private void AudioVisScroll_Scroll(object sender, ScrollEventArgs e)
+        {
+            startFrame = e.NewValue;
+            if (startFrame + numFrames >= audioDataEmm.GetLength())
+                startFrame = audioDataEmm.GetLength() - numFrames;
             AudioVis.Refresh();
         }
     }

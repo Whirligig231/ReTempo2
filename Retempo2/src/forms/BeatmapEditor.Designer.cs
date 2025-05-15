@@ -32,6 +32,7 @@
             StopButton = new Button();
             OpenButton = new Button();
             AudioVis = new PictureBox();
+            AudioVisScroll = new HScrollBar();
             ((System.ComponentModel.ISupportInitialize)AudioVis).BeginInit();
             SuspendLayout();
             // 
@@ -78,11 +79,21 @@
             AudioVis.Paint += AudioVis_Paint;
             AudioVis.Resize += AudioVis_Resize;
             // 
+            // AudioVisScroll
+            // 
+            AudioVisScroll.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            AudioVisScroll.Location = new Point(12, 353);
+            AudioVisScroll.Name = "AudioVisScroll";
+            AudioVisScroll.Size = new Size(600, 17);
+            AudioVisScroll.TabIndex = 4;
+            AudioVisScroll.Scroll += AudioVisScroll_Scroll;
+            // 
             // BeatmapEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 441);
+            Controls.Add(AudioVisScroll);
             Controls.Add(AudioVis);
             Controls.Add(OpenButton);
             Controls.Add(StopButton);
@@ -106,5 +117,6 @@
         private Button StopButton;
         private Button OpenButton;
         private PictureBox AudioVis;
+        private HScrollBar AudioVisScroll;
     }
 }
