@@ -8,7 +8,7 @@ namespace Retempo2
     {
         private AudioStream aStream; // The internal audio stream
         private float[]? audioFileSamples; // The audio data
-        private float[]? beatmap; // List of times of beats, in seconds
+        private List<float>? beatmap; // List of times of beats, in seconds
         private EfficientMinMax? audioDataEmm; // Stores audio data for visuals
         private SimpleArrayGenerator? sag; // Generates the audio stream
         private int playhead; // Frame number of playhead
@@ -110,7 +110,7 @@ namespace Retempo2
             {
                 Brush red = new SolidBrush(Color.Red);
                 Pen redPen = new Pen(red);
-                for (int i = 0; i < beatmap.Length; i++)
+                for (int i = 0; i < beatmap.Count; i++)
                 {
                     // TODO: What needs to change to support sample rates besides 44.1k?
                     float frame = beatmap[i] * sampleRate;
@@ -209,9 +209,9 @@ namespace Retempo2
             if (audioDataEmm == null || beatmap == null)
                 return;
             int currentFrame = (int)((aStream.NumFramesPlayed() + playhead) % audioDataEmm.GetLength());
-            while (currentBeatmapIndex < beatmap.Length && beatmap[currentBeatmapIndex] < (float)previousFrame / sampleRate)
+            while (currentBeatmapIndex < beatmap.Count && beatmap[currentBeatmapIndex] < (float)previousFrame / sampleRate)
                 currentBeatmapIndex++;
-            if (currentBeatmapIndex >= beatmap.Length)
+            if (currentBeatmapIndex >= beatmap.Count)
                 return;
             if (beatmap[currentBeatmapIndex] < (float)currentFrame / sampleRate)
                 clickSound.Play();
@@ -233,7 +233,8 @@ namespace Retempo2
             // Snap to beats!
             // Check if there's a beat nearby
             float mouseSeconds = mouseFrame / sampleRate;
-            int snapBeat = BinarySearch.Closest(beatmap, mouseSeconds);
+            int closestBeat = BinarySearch.Closest(beatmap, mouseSeconds);
+            int snapBeat = closestBeat;
             if (snapBeat >= 0)
             {
                 float snapBeatSeconds = beatmap[snapBeat];
@@ -251,16 +252,33 @@ namespace Retempo2
                     snapBeat = -1;
             }
 
-            bool playing = aStream.IsPlaying();
-            if (playing)
-                StopAudio();
+            if (e.Button == MouseButtons.Left)
+            {
+                // Left button: place playhead
+                bool playing = aStream.IsPlaying();
+                if (playing)
+                    StopAudio();
 
-            playhead = (int)MathF.Floor(mouseFrame);
+                playhead = (int)MathF.Floor(mouseFrame);
 
-            if (playing)
-                PlayAudio();
+                if (playing)
+                    PlayAudio();
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                // Right button: add/remove beat
+                if (snapBeat >= 0)
+                    beatmap.RemoveAt(snapBeat);
+                else
+                {
+                    int newIndex = closestBeat;
+                    if (beatmap[newIndex] < mouseSeconds)
+                        newIndex++;
+                    beatmap.Insert(newIndex, mouseSeconds);
+                }
+            }
 
-            AudioVis.Refresh();
+                AudioVis.Refresh();
         }
 
         private void SeekStartButton_Click(object sender, EventArgs e)
