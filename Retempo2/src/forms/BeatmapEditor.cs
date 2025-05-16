@@ -91,7 +91,7 @@ namespace Retempo2
             playhead = 0;
 
             // Debug: generate a test beatmap
-            beatmap = [0.029f, 0.529f, 1.029f, 1.529f, 2.029f, 2.529f, 3.029f, 3.529f];
+            beatmap = [0.0f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 3.5f];
 
             AudioVis.Refresh();
         }
@@ -220,15 +220,42 @@ namespace Retempo2
 
         private void AudioVis_MouseClick(object sender, MouseEventArgs e)
         {
+            // TODO: is there any context where we want to click with no beatmap, not even an empty beatmap?
+            if (beatmap == null)
+                return;
+
+            // Get the frame clicked on
+            Control panel = AudioVis;
+            float xFrac = (float)(e.X) / panel.Width;
+            // Get the corresponding frame
+            float mouseFrame = startFrame + numFrames * xFrac;
+            
+            // Snap to beats!
+            // Check if there's a beat nearby
+            float mouseSeconds = mouseFrame / sampleRate;
+            int snapBeat = BinarySearch.Closest(beatmap, mouseSeconds);
+            if (snapBeat >= 0)
+            {
+                float snapBeatSeconds = beatmap[snapBeat];
+                float diffSeconds = MathF.Abs(mouseSeconds - snapBeatSeconds);
+                float diffFrames = diffSeconds * sampleRate;
+                float diffFrac = diffFrames / numFrames;
+                float diffPixels = diffFrac * panel.Width;
+
+                if (diffPixels <= 5)
+                {
+                    mouseSeconds = snapBeatSeconds;
+                    mouseFrame = snapBeatSeconds * sampleRate;
+                }
+                else
+                    snapBeat = -1;
+            }
+
             bool playing = aStream.IsPlaying();
             if (playing)
                 StopAudio();
 
-            // Get mouse X as a fraction
-            Control panel = AudioVis;
-            float xFrac = (float)(e.X) / panel.Width;
-            // Get the corresponding frame
-            playhead = (int)MathF.Floor(startFrame + numFrames * xFrac);
+            playhead = (int)MathF.Floor(mouseFrame);
 
             if (playing)
                 PlayAudio();
