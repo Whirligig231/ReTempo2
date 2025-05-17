@@ -1,4 +1,5 @@
 using System.Media;
+using System.Windows.Forms;
 using PortAudioSharp;
 using Timer = System.Windows.Forms.Timer;
 
@@ -20,6 +21,10 @@ namespace Retempo2
         private SoundPlayer clickSound;
 
         private const float sampleRate = 44100.0f; // TODO
+
+        private int draggingBeatIndex = -1; // Index of the currently dragged beat
+        private bool dragHasMoved = false; // Has the currently dragged beat moved?
+        private bool dragIsRemovable = false; // Should we remove the dragged beat?
 
         private void PlayAudio()
         {
@@ -229,18 +234,52 @@ namespace Retempo2
             previousFrame = currentFrame;
         }
 
-        private void AudioVis_MouseClick(object sender, MouseEventArgs e)
+        private bool WithinSnapThreshold(float secondsA, float secondsB)
+        {
+
+            Control panel = AudioVis;
+
+            float diffSeconds = MathF.Abs(secondsA - secondsB);
+            float diffFrames = diffSeconds * sampleRate;
+            float diffFrac = diffFrames / numFrames;
+            float diffPixels = diffFrac * panel.Width;
+            return (diffPixels <= 5);
+        }
+
+        private float GetFrameFromPixels(float pixels)
+        {
+            Control panel = AudioVis;
+            float xFrac = (float)(pixels) / panel.Width;
+            // Get the corresponding frame
+            return startFrame + numFrames * xFrac;
+        }
+
+        private void ReinsertIntoBeatmap(ref int index)
+        {
+            if (beatmap == null || beatmap.Count == 0)
+                return;
+            // Make sure that the beatmap is still in order after something moved
+            while (index > 0 && beatmap[index] < beatmap[index - 1])
+            {
+                (beatmap[index], beatmap[index - 1]) = (beatmap[index - 1], beatmap[index]);
+                index--;
+            }
+            while (index < beatmap.Count - 1 && beatmap[index] > beatmap[index + 1])
+            {
+                (beatmap[index], beatmap[index + 1]) = (beatmap[index + 1], beatmap[index]);
+                index++;
+            }
+        }
+
+        private void AudioVis_MouseDown(object sender, MouseEventArgs e)
         {
             // TODO: is there any context where we want to click with no beatmap, not even an empty beatmap?
             if (beatmap == null)
                 return;
 
-            // Get the frame clicked on
-            Control panel = AudioVis;
-            float xFrac = (float)(e.X) / panel.Width;
             // Get the corresponding frame
-            float mouseFrame = startFrame + numFrames * xFrac;
-            
+            float mouseFrame = GetFrameFromPixels(e.X);
+
             // Snap to beats!
             // Check if there's a beat nearby
             float mouseSeconds = mouseFrame / sampleRate;
@@ -249,12 +288,8 @@ namespace Retempo2
             if (snapBeat >= 0)
             {
                 float snapBeatSeconds = beatmap[snapBeat];
-                float diffSeconds = MathF.Abs(mouseSeconds - snapBeatSeconds);
-                float diffFrames = diffSeconds * sampleRate;
-                float diffFrac = diffFrames / numFrames;
-                float diffPixels = diffFrac * panel.Width;
 
-                if (diffPixels <= 5)
+                if (WithinSnapThreshold(mouseSeconds, snapBeatSeconds))
                 {
                     mouseSeconds = snapBeatSeconds;
                     mouseFrame = snapBeatSeconds * sampleRate;
@@ -262,6 +297,9 @@ namespace Retempo2
                 else
                     snapBeat = -1;
             }
+
+            draggingBeatIndex = -1;
+            dragHasMoved = false;
 
             if (e.Button == MouseButtons.Left)
             {
@@ -279,17 +317,62 @@ namespace Retempo2
             {
                 // Right button: add/remove beat
                 if (snapBeat >= 0)
-                    beatmap.RemoveAt(snapBeat);
+                {
+                    draggingBeatIndex = snapBeat;
+                    dragIsRemovable = true;
+                }
                 else
                 {
                     int newIndex = closestBeat;
-                    if (beatmap[newIndex] < mouseSeconds)
+                    if (newIndex < 0)
+                        newIndex = 0;
+                    else if (beatmap[newIndex] < mouseSeconds)
                         newIndex++;
                     beatmap.Insert(newIndex, mouseSeconds);
+                    draggingBeatIndex = newIndex;
+                    dragIsRemovable = false;
                 }
             }
 
+            AudioVis.Refresh();
+        }
+
+        private void AudioVis_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (beatmap == null)
+                return;
+
+            if (draggingBeatIndex >= 0)
+            {
+                float mouseFrame = GetFrameFromPixels(e.X);
+                float mouseSeconds = mouseFrame / sampleRate;
+
+                if (!WithinSnapThreshold(mouseSeconds, beatmap[draggingBeatIndex]))
+                    dragHasMoved = true;
+
+                if (dragHasMoved)
+                {
+                    beatmap[draggingBeatIndex] = mouseSeconds;
+                    ReinsertIntoBeatmap(ref draggingBeatIndex);
+                }
+
                 AudioVis.Refresh();
+            }
+        }
+
+        private void AudioVis_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (beatmap == null)
+                return;
+
+            if (draggingBeatIndex >= 0)
+            {
+                if (dragIsRemovable && !dragHasMoved)
+                    beatmap.RemoveAt(draggingBeatIndex);
+                draggingBeatIndex = -1;
+
+                AudioVis.Refresh();
+            }
         }
 
         private void SeekStartButton_Click(object sender, EventArgs e)

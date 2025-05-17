@@ -78,7 +78,9 @@
             AudioVis.TabIndex = 3;
             AudioVis.TabStop = false;
             AudioVis.Paint += AudioVis_Paint;
-            AudioVis.MouseClick += AudioVis_MouseClick;
+            AudioVis.MouseDown += AudioVis_MouseDown;
+            AudioVis.MouseMove += AudioVis_MouseMove;
+            AudioVis.MouseUp += AudioVis_MouseUp;
             AudioVis.Resize += AudioVis_Resize;
             // 
             // AudioVisScroll
