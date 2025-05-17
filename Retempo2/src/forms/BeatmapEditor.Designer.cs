@@ -34,6 +34,7 @@
             AudioVis = new PictureBox();
             AudioVisScroll = new HScrollBar();
             SeekStartButton = new NonSelectableButton();
+            ManualTempoButton = new NonSelectableButton();
             ((System.ComponentModel.ISupportInitialize)AudioVis).BeginInit();
             SuspendLayout();
             // 
@@ -103,11 +104,22 @@
             SeekStartButton.UseVisualStyleBackColor = true;
             SeekStartButton.Click += SeekStartButton_Click;
             // 
+            // ManualTempoButton
+            // 
+            ManualTempoButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            ManualTempoButton.Image = Properties.Resources.metronome;
+            ManualTempoButton.Location = new Point(292, 12);
+            ManualTempoButton.Name = "ManualTempoButton";
+            ManualTempoButton.Size = new Size(64, 64);
+            ManualTempoButton.TabIndex = 5;
+            ManualTempoButton.UseVisualStyleBackColor = true;
+            // 
             // BeatmapEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 441);
+            Controls.Add(ManualTempoButton);
             Controls.Add(SeekStartButton);
             Controls.Add(AudioVisScroll);
             Controls.Add(AudioVis);
@@ -130,12 +142,12 @@
         }
 
         #endregion
-
-        private Button PlayButton;
-        private Button StopButton;
-        private Button OpenButton;
         private PictureBox AudioVis;
         private HScrollBar AudioVisScroll;
-        private Button SeekStartButton;
+        private NonSelectableButton ManualTempoButton;
+        private NonSelectableButton PlayButton;
+        private NonSelectableButton StopButton;
+        private NonSelectableButton OpenButton;
+        private NonSelectableButton SeekStartButton;
     }
 }
