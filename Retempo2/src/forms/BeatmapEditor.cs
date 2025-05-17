@@ -353,6 +353,7 @@ namespace Retempo2
                 else
                 {
                     playhead[0] = (int)MathF.Floor(mouseFrame);
+                    playhead[1] = playhead[0];
                     draggingPlayheadIndex = 1;
                 }
             }
