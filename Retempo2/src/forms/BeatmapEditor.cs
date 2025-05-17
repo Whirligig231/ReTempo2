@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Media;
 using System.Windows.Forms;
 using PortAudioSharp;
@@ -282,7 +283,12 @@ namespace Retempo2
             Control panel = AudioVis;
             float xFrac = (float)(pixels) / panel.Width;
             // Get the corresponding frame
-            return startFrame + numFrames * xFrac;
+            float frameNo = startFrame + numFrames * xFrac;
+            if (frameNo < startFrame)
+                frameNo = startFrame;
+            if (frameNo >= startFrame + numFrames)
+                frameNo = startFrame + numFrames - 1;
+            return frameNo;
         }
 
         private void ReinsertIntoBeatmap(ref int index)
