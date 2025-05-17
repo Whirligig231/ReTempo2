@@ -58,6 +58,17 @@ namespace Retempo2
 
         }
 
+        private void BeatmapEditor_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Space)
+            {
+                if (aStream.IsPlaying())
+                    StopAudio();
+                else
+                    PlayAudio();
+            }
+        }
+
         private void PlayButton_Click(object sender, EventArgs e)
         {
             PlayAudio();
@@ -201,7 +212,7 @@ namespace Retempo2
             AudioVis.Refresh();
         }
 
-        private void PlayTimer_Tick(object sender, EventArgs e)
+        private void PlayTimer_Tick(object? sender, EventArgs e)
         {
             AudioVis.Refresh();
 

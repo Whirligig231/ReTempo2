@@ -28,12 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            PlayButton = new Button();
-            StopButton = new Button();
-            OpenButton = new Button();
+            PlayButton = new NonSelectableButton();
+            StopButton = new NonSelectableButton();
+            OpenButton = new NonSelectableButton();
             AudioVis = new PictureBox();
             AudioVisScroll = new HScrollBar();
-            SeekStartButton = new Button();
+            SeekStartButton = new NonSelectableButton();
             ((System.ComponentModel.ISupportInitialize)AudioVis).BeginInit();
             SuspendLayout();
             // 
@@ -112,9 +112,11 @@
             Controls.Add(OpenButton);
             Controls.Add(StopButton);
             Controls.Add(PlayButton);
+            KeyPreview = true;
             Name = "BeatmapEditor";
             Text = "Retempo 2 {VERSION} - Beatmap Editor";
             Load += BeatmapEditor_Load;
+            KeyDown += BeatmapEditor_KeyDown;
             MouseWheel += BeatmapEditor_MouseWheel;
             ((System.ComponentModel.ISupportInitialize)AudioVis).EndInit();
             ResumeLayout(false);
