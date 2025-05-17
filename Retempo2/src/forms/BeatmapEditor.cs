@@ -12,7 +12,7 @@ namespace Retempo2
         private List<float>? beatmap; // List of times of beats, in seconds
         private EfficientMinMax? audioDataEmm; // Stores audio data for visuals
         private SimpleArrayGenerator? sag; // Generates the audio stream
-        private int playhead; // Frame number of playhead
+        private int[] playhead; // Frame number of playhead start and end
         private int startFrame, numFrames; // In the current window
 
         private Timer playTimer; // Timer to manage playback visuals and beat ticks
@@ -23,26 +23,11 @@ namespace Retempo2
         private const float sampleRate = 44100.0f; // TODO
 
         private int draggingBeatIndex = -1; // Index of the currently dragged beat
-        private bool dragHasMoved = false; // Has the currently dragged beat moved?
-        private bool dragIsRemovable = false; // Should we remove the dragged beat?
+        private bool dragBeatHasMoved = false; // Has the currently dragged beat moved?
+        private bool dragBeatIsRemovable = false; // Should we remove the dragged beat?
 
-        private void PlayAudio()
-        {
-            if (sag == null)
-                return;
-            sag.playheadStartFrame = playhead;
-            previousFrame = playhead;
-            currentBeatmapIndex = 0;
-            aStream.Play();
-            playTimer.Start();
-        }
-
-        private void StopAudio()
-        {
-            aStream.Stop();
-            playTimer.Stop();
-            AudioVis.Refresh();
-        }
+        private int draggingPlayheadIndex = -1; // Index of the currently dragged playhead
+        private bool dragPlayheadHasMoved = false; // Has the currently dragged playhead moved?
 
         public BeatmapEditor()
         {
@@ -56,6 +41,26 @@ namespace Retempo2
             playTimer.Tick += PlayTimer_Tick;
 
             clickSound = new SoundPlayer(new MemoryStream(Properties.Resources.click));
+
+            playhead = new int[2];
+        }
+
+        private void PlayAudio()
+        {
+            if (sag == null)
+                return;
+            sag.playheadStartFrame = playhead[0];
+            previousFrame = playhead[0];
+            currentBeatmapIndex = 0;
+            aStream.Play();
+            playTimer.Start();
+        }
+
+        private void StopAudio()
+        {
+            aStream.Stop();
+            playTimer.Stop();
+            AudioVis.Refresh();
         }
 
         private void BeatmapEditor_Load(object sender, EventArgs e)
@@ -104,7 +109,8 @@ namespace Retempo2
             sag = new SimpleArrayGenerator(audioFileSamples);
             aStream.SetCallback(sag.Callback);
 
-            playhead = 0;
+            playhead[0] = 0;
+            playhead[1] = 0;
 
             // Beatmap starts empty
             beatmap = [];
@@ -115,6 +121,22 @@ namespace Retempo2
         private void AudioVis_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+
+            // Draw selection
+            if (audioDataEmm != null)
+            {
+                Brush gray = new SolidBrush(Color.LightGray);
+                int selectStart = int.Max(playhead[0], startFrame);
+                int selectEnd = int.Min(playhead[1], startFrame + numFrames - 1);
+                if (selectStart < startFrame + numFrames && selectEnd >= startFrame)
+                {
+                    float fracA = (float)(selectStart - startFrame) / numFrames;
+                    int fracAPixel = (int)MathF.Floor(fracA * AudioVis.Width);
+                    float fracB = (float)(selectEnd - startFrame) / numFrames;
+                    int fracBPixel = (int)MathF.Floor(fracB * AudioVis.Width);
+                    g.FillRectangle(gray, fracAPixel, 0, fracBPixel - fracAPixel, AudioVis.Height);
+                }
+            }
 
             // Draw waveform
             Brush blue = new SolidBrush(Color.Blue);
@@ -146,9 +168,9 @@ namespace Retempo2
             {
                 Brush black = new SolidBrush(Color.Black);
                 Pen blackPen = new Pen(black);
-                if (playhead >= startFrame && playhead < startFrame + numFrames)
+                if (playhead[0] >= startFrame && playhead[0] < startFrame + numFrames)
                 {
-                    float frac = (float)(playhead - startFrame) / numFrames;
+                    float frac = (float)(playhead[0] - startFrame) / numFrames;
                     int fracPixel = (int)MathF.Floor(frac * AudioVis.Width);
                     g.DrawLine(blackPen, fracPixel, 0, fracPixel, AudioVis.Height);
                 }
@@ -159,7 +181,7 @@ namespace Retempo2
             {
                 Brush green = new SolidBrush(Color.Green);
                 Pen greenPen = new Pen(green);
-                int currentFrame = (int)((aStream.NumFramesPlayed() + playhead) % audioDataEmm.GetLength());
+                int currentFrame = (int)((aStream.NumFramesPlayed() + playhead[0]) % audioDataEmm.GetLength());
                 if (currentFrame >= startFrame && currentFrame < startFrame + numFrames)
                 {
                     float frac = (float)(currentFrame - startFrame) / numFrames;
@@ -224,7 +246,7 @@ namespace Retempo2
             // Check for beat
             if (audioDataEmm == null || beatmap == null)
                 return;
-            int currentFrame = (int)((aStream.NumFramesPlayed() + playhead) % audioDataEmm.GetLength());
+            int currentFrame = (int)((aStream.NumFramesPlayed() + playhead[0]) % audioDataEmm.GetLength());
             while (currentBeatmapIndex < beatmap.Count && beatmap[currentBeatmapIndex] < (float)previousFrame / sampleRate)
                 currentBeatmapIndex++;
             if (currentBeatmapIndex >= beatmap.Count)
@@ -234,9 +256,18 @@ namespace Retempo2
             previousFrame = currentFrame;
         }
 
-        private bool WithinSnapThreshold(float secondsA, float secondsB)
+        private bool WithinSnapThresholdFrames(float framesA, float framesB)
         {
+            Control panel = AudioVis;
 
+            float diffFrames = MathF.Abs(framesA - framesB);
+            float diffFrac = diffFrames / numFrames;
+            float diffPixels = diffFrac * panel.Width;
+            return (diffPixels <= 5);
+        }
+
+        private bool WithinSnapThresholdSeconds(float secondsA, float secondsB)
+        {
             Control panel = AudioVis;
 
             float diffSeconds = MathF.Abs(secondsA - secondsB);
@@ -277,6 +308,10 @@ namespace Retempo2
             if (beatmap == null)
                 return;
 
+            // Disable when playing
+            if (aStream.IsPlaying())
+                return;
+
             // Get the corresponding frame
             float mouseFrame = GetFrameFromPixels(e.X);
 
@@ -289,7 +324,7 @@ namespace Retempo2
             {
                 float snapBeatSeconds = beatmap[snapBeat];
 
-                if (WithinSnapThreshold(mouseSeconds, snapBeatSeconds))
+                if (WithinSnapThresholdSeconds(mouseSeconds, snapBeatSeconds))
                 {
                     mouseSeconds = snapBeatSeconds;
                     mouseFrame = snapBeatSeconds * sampleRate;
@@ -299,19 +334,21 @@ namespace Retempo2
             }
 
             draggingBeatIndex = -1;
-            dragHasMoved = false;
+            dragBeatHasMoved = false;
+            draggingPlayheadIndex = -1;
+            dragPlayheadHasMoved = false;
 
             if (e.Button == MouseButtons.Left)
             {
-                // Left button: place playhead
-                bool playing = aStream.IsPlaying();
-                if (playing)
-                    StopAudio();
-
-                playhead = (int)MathF.Floor(mouseFrame);
-
-                if (playing)
-                    PlayAudio();
+                if (WithinSnapThresholdFrames(mouseFrame, playhead[1]))
+                    draggingPlayheadIndex = 1;
+                else if (WithinSnapThresholdFrames(mouseFrame, playhead[0]))
+                    draggingPlayheadIndex = 0;
+                else
+                {
+                    playhead[0] = (int)MathF.Floor(mouseFrame);
+                    draggingPlayheadIndex = 1;
+                }
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -319,7 +356,7 @@ namespace Retempo2
                 if (snapBeat >= 0)
                 {
                     draggingBeatIndex = snapBeat;
-                    dragIsRemovable = true;
+                    dragBeatIsRemovable = true;
                 }
                 else
                 {
@@ -330,7 +367,7 @@ namespace Retempo2
                         newIndex++;
                     beatmap.Insert(newIndex, mouseSeconds);
                     draggingBeatIndex = newIndex;
-                    dragIsRemovable = false;
+                    dragBeatIsRemovable = false;
                 }
             }
 
@@ -342,18 +379,57 @@ namespace Retempo2
             if (beatmap == null)
                 return;
 
+            // Disable when playing
+            if (aStream.IsPlaying())
+                return;
+
             if (draggingBeatIndex >= 0)
             {
                 float mouseFrame = GetFrameFromPixels(e.X);
                 float mouseSeconds = mouseFrame / sampleRate;
 
-                if (!WithinSnapThreshold(mouseSeconds, beatmap[draggingBeatIndex]))
-                    dragHasMoved = true;
+                if (!WithinSnapThresholdSeconds(mouseSeconds, beatmap[draggingBeatIndex]))
+                    dragBeatHasMoved = true;
 
-                if (dragHasMoved)
+                if (dragBeatHasMoved)
                 {
                     beatmap[draggingBeatIndex] = mouseSeconds;
                     ReinsertIntoBeatmap(ref draggingBeatIndex);
+                }
+
+                AudioVis.Refresh();
+            }
+
+            if (draggingPlayheadIndex >= 0)
+            {
+                float mouseFrame = GetFrameFromPixels(e.X);
+                float mouseSeconds = mouseFrame / sampleRate;
+                int closestBeat = BinarySearch.Closest(beatmap, mouseSeconds);
+                int snapBeat = closestBeat;
+                if (snapBeat >= 0)
+                {
+                    float snapBeatSeconds = beatmap[snapBeat];
+
+                    if (WithinSnapThresholdSeconds(mouseSeconds, snapBeatSeconds))
+                    {
+                        mouseSeconds = snapBeatSeconds;
+                        mouseFrame = snapBeatSeconds * sampleRate;
+                    }
+                    else
+                        snapBeat = -1;
+                }
+
+                if (!WithinSnapThresholdFrames(mouseFrame, playhead[draggingPlayheadIndex]))
+                    dragPlayheadHasMoved = true;
+
+                if (dragPlayheadHasMoved)
+                {
+                    playhead[draggingPlayheadIndex] = (int)MathF.Floor(mouseFrame);
+                    if (playhead[1] < playhead[0])
+                    {
+                        (playhead[0], playhead[1]) = (playhead[1], playhead[0]);
+                        draggingPlayheadIndex = 1 - draggingPlayheadIndex;
+                    }
                 }
 
                 AudioVis.Refresh();
@@ -365,12 +441,22 @@ namespace Retempo2
             if (beatmap == null)
                 return;
 
+            // Disable when playing
+            if (aStream.IsPlaying())
+                return;
+
             if (draggingBeatIndex >= 0)
             {
-                if (dragIsRemovable && !dragHasMoved)
+                if (dragBeatIsRemovable && !dragBeatHasMoved)
                     beatmap.RemoveAt(draggingBeatIndex);
                 draggingBeatIndex = -1;
 
+                AudioVis.Refresh();
+            }
+
+            if (draggingPlayheadIndex >= 0)
+            {
+                draggingPlayheadIndex = -1;
                 AudioVis.Refresh();
             }
         }
@@ -381,7 +467,8 @@ namespace Retempo2
             if (playing)
                 StopAudio();
 
-            playhead = 0;
+            playhead[0] = 0;
+            playhead[1] = 0;
 
             if (playing)
                 PlayAudio();
