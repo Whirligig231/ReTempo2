@@ -680,7 +680,7 @@ namespace Retempo2
             AudioVis.Refresh();
         }
 
-        private void ManualTempoButton_Click(object sender, EventArgs e)
+        private void MapBeatsByTempo()
         {
             if (beatmap == null)
                 return;
@@ -706,7 +706,12 @@ namespace Retempo2
             form.ShowDialog();
         }
 
-        private void AutoTempoButton_Click(object sender, EventArgs e)
+        private void ManualTempoButton_Click(object sender, EventArgs e)
+        {
+            MapBeatsByTempo();
+        }
+
+        private void DetectBeats()
         {
             if (audioFileSamples == null)
                 return;
@@ -735,6 +740,11 @@ namespace Retempo2
             // Insert the new list
             beatmap.InsertRange(startIndex, newBeats);
             AudioVis.Refresh();
+        }
+
+        private void AutoTempoButton_Click(object sender, EventArgs e)
+        {
+            DetectBeats();
         }
 
         private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -795,6 +805,16 @@ namespace Retempo2
         private void toNextBeatToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SeekToNextBeat();
+        }
+
+        private void mapBeatsByTempoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MapBeatsByTempo();
+        }
+
+        private void detectBeatsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DetectBeats();
         }
     }
 }

@@ -339,27 +339,27 @@
             // playStopToolStripMenuItem
             // 
             playStopToolStripMenuItem.Name = "playStopToolStripMenuItem";
-            playStopToolStripMenuItem.Size = new Size(180, 22);
+            playStopToolStripMenuItem.Size = new Size(171, 22);
             playStopToolStripMenuItem.Text = "&Play/Stop";
             playStopToolStripMenuItem.Click += playStopToolStripMenuItem_Click;
             // 
             // restartPlaybackToolStripMenuItem
             // 
             restartPlaybackToolStripMenuItem.Name = "restartPlaybackToolStripMenuItem";
-            restartPlaybackToolStripMenuItem.Size = new Size(180, 22);
+            restartPlaybackToolStripMenuItem.Size = new Size(171, 22);
             restartPlaybackToolStripMenuItem.Text = "&Restart Playback";
             restartPlaybackToolStripMenuItem.Click += restartPlaybackToolStripMenuItem_Click;
             // 
             // toolStripSeparator5
             // 
             toolStripSeparator5.Name = "toolStripSeparator5";
-            toolStripSeparator5.Size = new Size(177, 6);
+            toolStripSeparator5.Size = new Size(168, 6);
             // 
             // toStartToolStripMenuItem
             // 
             toStartToolStripMenuItem.Name = "toStartToolStripMenuItem";
             toStartToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Left;
-            toStartToolStripMenuItem.Size = new Size(180, 22);
+            toStartToolStripMenuItem.Size = new Size(171, 22);
             toStartToolStripMenuItem.Text = "To &Start";
             toStartToolStripMenuItem.Click += toStartToolStripMenuItem_Click;
             // 
@@ -367,35 +367,35 @@
             // 
             toEndToolStripMenuItem.Name = "toEndToolStripMenuItem";
             toEndToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Right;
-            toEndToolStripMenuItem.Size = new Size(180, 22);
+            toEndToolStripMenuItem.Size = new Size(171, 22);
             toEndToolStripMenuItem.Text = "To &End";
             toEndToolStripMenuItem.Click += toEndToolStripMenuItem_Click;
             // 
             // toPrevFrameToolStripMenuItem
             // 
             toPrevFrameToolStripMenuItem.Name = "toPrevFrameToolStripMenuItem";
-            toPrevFrameToolStripMenuItem.Size = new Size(180, 22);
+            toPrevFrameToolStripMenuItem.Size = new Size(171, 22);
             toPrevFrameToolStripMenuItem.Text = "To &Prev Frame";
             toPrevFrameToolStripMenuItem.Click += toPrevFrameToolStripMenuItem_Click;
             // 
             // toNextFrameToolStripMenuItem
             // 
             toNextFrameToolStripMenuItem.Name = "toNextFrameToolStripMenuItem";
-            toNextFrameToolStripMenuItem.Size = new Size(180, 22);
+            toNextFrameToolStripMenuItem.Size = new Size(171, 22);
             toNextFrameToolStripMenuItem.Text = "To &Next Frame";
             toNextFrameToolStripMenuItem.Click += toNextFrameToolStripMenuItem_Click;
             // 
             // toPrevBeatToolStripMenuItem
             // 
             toPrevBeatToolStripMenuItem.Name = "toPrevBeatToolStripMenuItem";
-            toPrevBeatToolStripMenuItem.Size = new Size(180, 22);
+            toPrevBeatToolStripMenuItem.Size = new Size(171, 22);
             toPrevBeatToolStripMenuItem.Text = "To Prev Bea&t";
             toPrevBeatToolStripMenuItem.Click += toPrevBeatToolStripMenuItem_Click;
             // 
             // toNextBeatToolStripMenuItem
             // 
             toNextBeatToolStripMenuItem.Name = "toNextBeatToolStripMenuItem";
-            toNextBeatToolStripMenuItem.Size = new Size(180, 22);
+            toNextBeatToolStripMenuItem.Size = new Size(171, 22);
             toNextBeatToolStripMenuItem.Text = "To Next &Beat";
             toNextBeatToolStripMenuItem.Click += toNextBeatToolStripMenuItem_Click;
             // 
@@ -412,6 +412,7 @@
             mapBeatsByTempoToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.M;
             mapBeatsByTempoToolStripMenuItem.Size = new Size(238, 22);
             mapBeatsByTempoToolStripMenuItem.Text = "&Map Beats By Tempo...";
+            mapBeatsByTempoToolStripMenuItem.Click += mapBeatsByTempoToolStripMenuItem_Click;
             // 
             // detectBeatsToolStripMenuItem
             // 
@@ -419,6 +420,7 @@
             detectBeatsToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.B;
             detectBeatsToolStripMenuItem.Size = new Size(238, 22);
             detectBeatsToolStripMenuItem.Text = "&Detect Beats";
+            detectBeatsToolStripMenuItem.Click += detectBeatsToolStripMenuItem_Click;
             // 
             // helpToolStripMenuItem
             // 
