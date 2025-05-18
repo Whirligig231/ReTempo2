@@ -106,6 +106,7 @@
             // 
             // ManualTempoButton
             // 
+            ManualTempoButton.Enabled = false;
             ManualTempoButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             ManualTempoButton.Image = Properties.Resources.metronome;
             ManualTempoButton.Location = new Point(292, 12);
@@ -113,6 +114,7 @@
             ManualTempoButton.Size = new Size(64, 64);
             ManualTempoButton.TabIndex = 5;
             ManualTempoButton.UseVisualStyleBackColor = true;
+            ManualTempoButton.Click += ManualTempoButton_Click;
             // 
             // BeatmapEditor
             // 

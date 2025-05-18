@@ -466,6 +466,8 @@ namespace Retempo2
                 draggingPlayheadIndex = -1;
                 AudioVis.Refresh();
             }
+
+            ManualTempoButton.Enabled = (playhead[1] > playhead[0]);
         }
 
         private void SeekStartButton_Click(object sender, EventArgs e)
@@ -481,6 +483,12 @@ namespace Retempo2
                 PlayAudio();
 
             AudioVis.Refresh();
+        }
+
+        private void ManualTempoButton_Click(object sender, EventArgs e)
+        {
+            Form form = new ManualTempoDialog((float)(playhead[1] - playhead[0]) / sampleRate);
+            form.ShowDialog();
         }
     }
 }
