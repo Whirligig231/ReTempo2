@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Media;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using PortAudioSharp;
 using Timer = System.Windows.Forms.Timer;
@@ -102,7 +103,7 @@ namespace Retempo2
             string? fname = DialogSupport.GetAudioFname();
             if (fname == null)
                 return;
-            audioFileSamples = AudioFileLoad.LoadMFRFile(fname);
+            audioFileSamples = AudioFileHandling.LoadMFRFile(fname);
             if (audioFileSamples == null)
             {
                 AudioVis.Refresh();
@@ -150,7 +151,7 @@ namespace Retempo2
                     g.FillRectangle(gray, fracAPixel, 0, fracBPixel - fracAPixel, AudioVis.Height);
                 }
             }
-            
+
             // Draw beats
             if (audioDataEmm != null && beatmap != null)
             {
@@ -478,6 +479,7 @@ namespace Retempo2
             }
 
             ManualTempoButton.Enabled = (playhead[1] > playhead[0]);
+            AutoTempoButton.Enabled = (playhead[1] > playhead[0]);
         }
 
         private void SeekStartButton_Click(object sender, EventArgs e)
@@ -495,14 +497,11 @@ namespace Retempo2
             AudioVis.Refresh();
         }
 
-        private void FillManualTempoBeats(float beats)
+        private int GetBeatIndex(float startSeconds)
         {
             if (beatmap == null)
-                return;
-            float startSeconds = (float)playhead[0] / sampleRate;
-            float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
-
-            int startIndex; // Index at which beats should be inserted
+                return -1;
+            int startIndex;
             if (beatmap.Count == 0)
                 startIndex = 0;
             else
@@ -511,10 +510,28 @@ namespace Retempo2
                 if (beatmap[startIndex] < startSeconds)
                     startIndex++;
             }
+            return startIndex;
+        }
+
+        private void DeleteBeatsInRange(float startSeconds, float lengthSeconds)
+        {
+            if (beatmap == null)
+                return;
+            int startIndex = GetBeatIndex(startSeconds);
 
             // Delete beats in the affected area
             while (startIndex < beatmap.Count && beatmap[startIndex] <= (startSeconds + lengthSeconds))
                 beatmap.RemoveAt(startIndex);
+        }
+
+        private void FillManualTempoBeats(float beats)
+        {
+            if (beatmap == null)
+                return;
+            float startSeconds = (float)playhead[0] / sampleRate;
+            float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
+
+            DeleteBeatsInRange(startSeconds, lengthSeconds);
 
             // Make a list of new beats
             List<float> newBeats = new List<float>();
@@ -523,6 +540,7 @@ namespace Retempo2
                 newBeats.Add(((float)i / beats) * lengthSeconds + startSeconds);
             }
 
+            int startIndex = GetBeatIndex(startSeconds);
             // Insert the new list
             beatmap.InsertRange(startIndex, newBeats);
             AudioVis.Refresh();
@@ -532,6 +550,37 @@ namespace Retempo2
         {
             Form form = new ManualTempoDialog((float)(playhead[1] - playhead[0]) / sampleRate, FillManualTempoBeats);
             form.ShowDialog();
+        }
+
+        private void AutoTempoButton_Click(object sender, EventArgs e)
+        {
+            if (audioFileSamples == null)
+                return;
+            if (beatmap == null)
+                return;
+            float[] saveData = new float[(playhead[1] - playhead[0]) * 2];
+            Array.Copy(audioFileSamples, playhead[0] * 2, saveData, 0, saveData.Length);
+
+            float[]? beats = BeatrootWrapper.GetBeats(saveData);
+            if (beats == null)
+                return;
+
+            float startSeconds = (float)playhead[0] / sampleRate;
+            float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
+
+            DeleteBeatsInRange(startSeconds, lengthSeconds);
+
+            // Make a list of new beats
+            List<float> newBeats = new List<float>();
+            foreach (float beat in beats)
+            {
+                newBeats.Add(beat + startSeconds);
+            }
+
+            int startIndex = GetBeatIndex(startSeconds);
+            // Insert the new list
+            beatmap.InsertRange(startIndex, newBeats);
+            AudioVis.Refresh();
         }
     }
 }

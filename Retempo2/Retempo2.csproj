@@ -9,6 +9,36 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="vamp\beatroot-vamp.dll" />
+    <None Remove="vamp\libsndfile-1.dll" />
+    <None Remove="vamp\vamp-example-plugins.dll" />
+    <None Remove="vamp\VampHostSDK.lib" />
+    <None Remove="vamp\VampPluginSDK.lib" />
+    <None Remove="vamp\VampSimpleHost.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="vamp\beatroot-vamp.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vamp\libsndfile-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vamp\vamp-example-plugins.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vamp\VampHostSDK.lib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vamp\VampPluginSDK.lib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vamp\VampSimpleHost.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
     <PackageReference Include="PortAudioSharp2" Version="1.0.4" />

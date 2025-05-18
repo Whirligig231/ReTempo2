@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BeatmapEditor));
             PlayButton = new NonSelectableButton();
             StopButton = new NonSelectableButton();
             OpenButton = new NonSelectableButton();
@@ -35,6 +36,7 @@
             AudioVisScroll = new HScrollBar();
             SeekStartButton = new NonSelectableButton();
             ManualTempoButton = new NonSelectableButton();
+            AutoTempoButton = new NonSelectableButton();
             ((System.ComponentModel.ISupportInitialize)AudioVis).BeginInit();
             SuspendLayout();
             // 
@@ -108,7 +110,7 @@
             // 
             ManualTempoButton.Enabled = false;
             ManualTempoButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            ManualTempoButton.Image = Properties.Resources.metronome;
+            ManualTempoButton.Image = Properties.Resources.metronome_manual;
             ManualTempoButton.Location = new Point(292, 12);
             ManualTempoButton.Name = "ManualTempoButton";
             ManualTempoButton.Size = new Size(64, 64);
@@ -116,11 +118,24 @@
             ManualTempoButton.UseVisualStyleBackColor = true;
             ManualTempoButton.Click += ManualTempoButton_Click;
             // 
+            // AutoTempoButton
+            // 
+            AutoTempoButton.Enabled = false;
+            AutoTempoButton.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            AutoTempoButton.Image = (Image)resources.GetObject("AutoTempoButton.Image");
+            AutoTempoButton.Location = new Point(362, 12);
+            AutoTempoButton.Name = "AutoTempoButton";
+            AutoTempoButton.Size = new Size(64, 64);
+            AutoTempoButton.TabIndex = 6;
+            AutoTempoButton.UseVisualStyleBackColor = true;
+            AutoTempoButton.Click += AutoTempoButton_Click;
+            // 
             // BeatmapEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 441);
+            Controls.Add(AutoTempoButton);
             Controls.Add(ManualTempoButton);
             Controls.Add(SeekStartButton);
             Controls.Add(AudioVisScroll);
@@ -151,5 +166,6 @@
         private NonSelectableButton StopButton;
         private NonSelectableButton OpenButton;
         private NonSelectableButton SeekStartButton;
+        private NonSelectableButton AutoTempoButton;
     }
 }
