@@ -823,6 +823,8 @@ namespace Retempo2
 
             playhead[0] = 0;
             playhead[1] = audioDataEmm.GetLength() - 1;
+            ManualTempoButton.Enabled = (playhead[1] > playhead[0]);
+            AutoTempoButton.Enabled = (playhead[1] > playhead[0]);
             AudioVis.Refresh();
         }
 
