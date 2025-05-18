@@ -551,7 +551,27 @@ namespace Retempo2
 
         private void ManualTempoButton_Click(object sender, EventArgs e)
         {
-            Form form = new ManualTempoDialog((float)(playhead[1] - playhead[0]) / sampleRate, FillManualTempoBeats);
+            if (beatmap == null)
+                return;
+            // Get the suggested tempo
+            float? suggestedBeats = null;
+            if (beatmap.Count > 0)
+            {
+                float startSeconds = (float)playhead[0] / sampleRate;
+                float endSeconds = (float)playhead[1] / sampleRate;
+                int firstBeat = GetBeatIndex(startSeconds);
+                int lastBeat = GetBeatIndex(endSeconds);
+                if (lastBeat >= beatmap.Count || beatmap[lastBeat] > endSeconds)
+                    lastBeat--;
+                if (startSeconds <= beatmap[firstBeat] && firstBeat < lastBeat && beatmap[lastBeat] <= endSeconds)
+                {
+                    float lengthSeconds = endSeconds - startSeconds;
+                    float beatLength = beatmap[lastBeat] - beatmap[firstBeat];
+                    suggestedBeats = (lengthSeconds / beatLength) * (lastBeat - firstBeat);
+                }
+            }
+
+            Form form = new ManualTempoDialog((float)(playhead[1] - playhead[0]) / sampleRate, suggestedBeats, FillManualTempoBeats);
             form.ShowDialog();
         }
 

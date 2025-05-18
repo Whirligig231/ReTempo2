@@ -21,13 +21,22 @@ namespace Retempo2
 
         private bool ignoreChanged = false; // Ignore text changes
 
-        public ManualTempoDialog(float numSeconds, MTDCallback resultCallback)
+        public ManualTempoDialog(float numSeconds, float? suggestedBeats, MTDCallback resultCallback)
         {
             InitializeComponent();
             seconds = numSeconds;
             callback = resultCallback;
 
             SecondsLabel.Text = "Selection: " + seconds.ToString("0.000") + " seconds";
+
+            if (suggestedBeats != null)
+            {
+                float suggestedBpm = (suggestedBeats.Value / (seconds / 60.0f));
+                beatsText = suggestedBeats.Value.ToString();
+                bpmText = suggestedBpm.ToString();
+                BeatsBox.Text = beatsText;
+                BPMBox.Text = bpmText;
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
