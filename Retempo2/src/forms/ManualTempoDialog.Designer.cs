@@ -93,12 +93,14 @@
             // 
             // OKButton
             // 
+            OKButton.Enabled = false;
             OKButton.Location = new Point(176, 126);
             OKButton.Name = "OKButton";
             OKButton.Size = new Size(75, 23);
             OKButton.TabIndex = 6;
             OKButton.Text = "OK";
             OKButton.UseVisualStyleBackColor = true;
+            OKButton.Click += OKButton_Click;
             // 
             // ManualTempoDialog
             // 

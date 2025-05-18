@@ -485,9 +485,42 @@ namespace Retempo2
             AudioVis.Refresh();
         }
 
+        private void FillManualTempoBeats(float beats)
+        {
+            if (beatmap == null)
+                return;
+            float startSeconds = (float)playhead[0] / sampleRate;
+            float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
+
+            int startIndex; // Index at which beats should be inserted
+            if (beatmap.Count == 0)
+                startIndex = 0;
+            else
+            {
+                startIndex = BinarySearch.Closest(beatmap, startSeconds);
+                if (beatmap[startIndex] < startSeconds)
+                    startIndex++;
+            }
+
+            // Delete beats in the affected area
+            while (startIndex < beatmap.Count && beatmap[startIndex] <= (startSeconds + lengthSeconds))
+                beatmap.RemoveAt(startIndex);
+
+            // Make a list of new beats
+            List<float> newBeats = new List<float>();
+            for (int i = 0; i <= MathF.Floor(beats); i++)
+            {
+                newBeats.Add(((float)i / beats) * lengthSeconds + startSeconds);
+            }
+
+            // Insert the new list
+            beatmap.InsertRange(startIndex, newBeats);
+            AudioVis.Refresh();
+        }
+
         private void ManualTempoButton_Click(object sender, EventArgs e)
         {
-            Form form = new ManualTempoDialog((float)(playhead[1] - playhead[0]) / sampleRate);
+            Form form = new ManualTempoDialog((float)(playhead[1] - playhead[0]) / sampleRate, FillManualTempoBeats);
             form.ShowDialog();
         }
     }
