@@ -312,6 +312,11 @@ namespace Retempo2
 
         private void LoadNewSample()
         {
+            if (audioFname == null)
+            {
+                CreateNewDocument();
+                return;
+            }
             string? fname = DialogSupport.GetAudioFname();
             ReplaceSample(fname);
         }
