@@ -33,7 +33,7 @@ x To Prev Bea&t (Shift+Left)
 x To Next &Beat (Shift+Right)
 
 &TOOLS
-&Map Beats By Tempo... Ctrl+M
+&Map Beats by Tempo... Ctrl+M
 &Detect Beats Ctrl+B
 
 &HELP

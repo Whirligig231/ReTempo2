@@ -411,7 +411,7 @@
             mapBeatsByTempoToolStripMenuItem.Name = "mapBeatsByTempoToolStripMenuItem";
             mapBeatsByTempoToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.M;
             mapBeatsByTempoToolStripMenuItem.Size = new Size(238, 22);
-            mapBeatsByTempoToolStripMenuItem.Text = "&Map Beats By Tempo...";
+            mapBeatsByTempoToolStripMenuItem.Text = "&Map Beats by Tempo...";
             mapBeatsByTempoToolStripMenuItem.Click += mapBeatsByTempoToolStripMenuItem_Click;
             // 
             // detectBeatsToolStripMenuItem
