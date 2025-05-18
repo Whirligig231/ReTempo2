@@ -1,14 +1,14 @@
 &FILE
-&New... Ctrl+N
+x &New... Ctrl+N
 &Open... Ctrl+O
 -
 &Save Ctrl+S
 Save &As... Ctrl+Shift+S
 -
-&Import Sample... Ctrl+I
-&Reload Sample Ctrl+R
+x &Import Sample... Ctrl+I
+x &Reload Sample Ctrl+R
 -
-&Close Window Ctrl+W
+x &Close Window Ctrl+W
 
 &EDIT
 &Undo Ctrl+Z

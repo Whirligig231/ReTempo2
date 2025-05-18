@@ -11,6 +11,7 @@ namespace Retempo2
     public partial class BeatmapEditor : Form
     {
         private AudioStream aStream; // The internal audio stream
+        private string? audioFname; // Name of the audio file
         private float[]? audioFileSamples; // The audio data
         private List<float>? beatmap; // List of times of beats, in seconds
         private EfficientMinMax? audioDataEmm; // Stores audio data for visuals
@@ -259,11 +260,27 @@ namespace Retempo2
             StopAudio();
         }
 
-        private void OpenButton_Click(object sender, EventArgs e)
+        private void TrimBeatmap()
         {
-            string? fname = DialogSupport.GetAudioFname();
+            if (audioDataEmm == null)
+                return;
+            if (beatmap == null)
+                return;
+            for (int i = 0; i < beatmap.Count; i++)
+            {
+                if (beatmap[i] * sampleRate >= audioDataEmm.GetLength())
+                {
+                    beatmap.RemoveRange(i, beatmap.Count - i);
+                    break;
+                }
+            }
+        }
+
+        private void ReplaceSample(string? fname)
+        {
             if (fname == null)
                 return;
+            audioFname = fname;
             audioFileSamples = AudioFileHandling.LoadMFRFile(fname);
             if (audioFileSamples == null)
             {
@@ -273,17 +290,63 @@ namespace Retempo2
             audioDataEmm = null;
             AudioVis.Refresh();
             audioDataEmm = new EfficientMinMax(audioFileSamples, 2); // TODO: Support for other numbers of channels?
-            startFrame = 0;
-            numFrames = audioDataEmm.GetLength();
+
+            if (startFrame + numFrames > audioDataEmm.GetLength())
+            {
+                numFrames = audioDataEmm.GetLength() - startFrame;
+            }
+
             aStream.Stop();
-            beatmap = [];
+            if (beatmap == null)
+                beatmap = [];
+            else
+                TrimBeatmap();
             generator = new ArrayWithBeatsGenerator(audioFileSamples, beatmap, clickSoundSamples);
             aStream.SetCallback(generator.Callback);
 
+            playhead[0] = int.Min(playhead[0], audioDataEmm.GetLength() - 1);
+            playhead[1] = int.Min(playhead[1], audioDataEmm.GetLength() - 1);
+
+            AudioVis.Refresh();
+        }
+
+        private void LoadNewSample()
+        {
+            string? fname = DialogSupport.GetAudioFname();
+            ReplaceSample(fname);
+        }
+
+        private void ReloadSample()
+        {
+            if (audioFname == null || !File.Exists(audioFname))
+                LoadNewSample();
+            else
+                ReplaceSample(audioFname);
+        }
+
+        private void CreateNewDocument()
+        {
+            string? fname = DialogSupport.GetAudioFname();
+            if (fname == null)
+                return;
+            ReplaceSample(fname);
+
+            if (audioDataEmm == null)
+                return;
+            if (beatmap == null)
+                return;
+            beatmap.Clear();
+            startFrame = 0;
+            numFrames = audioDataEmm.GetLength();
             playhead[0] = 0;
             playhead[1] = 0;
 
             AudioVis.Refresh();
+        }
+
+        private void OpenButton_Click(object sender, EventArgs e)
+        {
+            LoadNewSample();
         }
 
         private void AudioVis_Paint(object sender, PaintEventArgs e)
@@ -815,6 +878,26 @@ namespace Retempo2
         private void detectBeatsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DetectBeats();
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateNewDocument();
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadNewSample();
+        }
+
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ReloadSample();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }

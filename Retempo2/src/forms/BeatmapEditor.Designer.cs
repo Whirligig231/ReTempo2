@@ -194,6 +194,7 @@
             newToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
             newToolStripMenuItem.Size = new Size(198, 22);
             newToolStripMenuItem.Text = "&New...";
+            newToolStripMenuItem.Click += newToolStripMenuItem_Click;
             // 
             // openToolStripMenuItem
             // 
@@ -236,6 +237,7 @@
             importToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.I;
             importToolStripMenuItem.Size = new Size(198, 22);
             importToolStripMenuItem.Text = "&Import Sample...";
+            importToolStripMenuItem.Click += importToolStripMenuItem_Click;
             // 
             // reloadToolStripMenuItem
             // 
@@ -243,6 +245,7 @@
             reloadToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.R;
             reloadToolStripMenuItem.Size = new Size(198, 22);
             reloadToolStripMenuItem.Text = "&Reload Sample";
+            reloadToolStripMenuItem.Click += reloadToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
@@ -255,6 +258,7 @@
             exitToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.W;
             exitToolStripMenuItem.Size = new Size(198, 22);
             exitToolStripMenuItem.Text = "&Close Window";
+            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // editToolStripMenuItem
             // 
