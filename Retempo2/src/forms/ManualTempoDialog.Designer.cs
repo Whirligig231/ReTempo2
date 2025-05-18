@@ -53,6 +53,7 @@
             BeatsBox.Name = "BeatsBox";
             BeatsBox.Size = new Size(57, 23);
             BeatsBox.TabIndex = 1;
+            BeatsBox.TextChanged += BeatsBox_TextChanged;
             // 
             // BPMBox
             // 
@@ -60,6 +61,7 @@
             BPMBox.Name = "BPMBox";
             BPMBox.Size = new Size(57, 23);
             BPMBox.TabIndex = 2;
+            BPMBox.TextChanged += BPMBox_TextChanged;
             // 
             // BPMLabel
             // 
