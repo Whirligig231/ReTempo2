@@ -1,0 +1,42 @@
+&FILE
+&New... Ctrl+N
+&Open... Ctrl+O
+-
+&Save Ctrl+S
+Save &As... Ctrl+Shift+S
+-
+&Import Sample... Ctrl+I
+&Reload Sample Ctrl+R
+-
+&Close Window Ctrl+W
+
+&EDIT
+&Undo Ctrl+Z
+&Redo Ctrl+Y
+-
+Cu&t Ctrl+X
+&Copy Ctrl+C
+&Paste Ctrl+V
+&Delete Delete
+-
+Select &All Ctrl+A
+
+&PLAYHEAD
+&Play/Stop (Space)
+&Restart Playback (Shift+Space)
+-
+To &Start Ctrl+Left
+To &End Ctrl+Right
+To &Prev Frame (Left)
+To Next &Frame (Right)
+To Prev Bea&t (Shift+Left)
+To Next &Beat (Shift+Right)
+
+&TOOLS
+&Map Beats By Tempo... Ctrl+M
+&Detect Beats Ctrl+B
+
+&HELP
+Show &README F1
+-
+&About...

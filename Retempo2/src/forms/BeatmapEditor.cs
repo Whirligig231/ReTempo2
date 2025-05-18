@@ -86,10 +86,78 @@ namespace Retempo2
         {
             if (e.KeyCode == Keys.Space)
             {
-                if (aStream.IsPlaying())
+                if (aStream.IsPlaying() && (e.Modifiers & Keys.Shift) == 0)
                     StopAudio();
                 else
                     PlayAudio();
+            }
+            else if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
+            {
+                if (audioDataEmm == null)
+                    return;
+
+                if (beatmap == null)
+                    return;
+
+                if (aStream.IsPlaying())
+                    return;
+
+                if (e.KeyCode == Keys.Left && (e.Modifiers & Keys.Shift) == 0)
+                {
+                    playhead[0]--;
+                    if (playhead[0] < 0)
+                        playhead[0] = 0;
+                    playhead[1] = playhead[0];
+                }
+                else if (e.KeyCode == Keys.Right && (e.Modifiers & Keys.Shift) == 0)
+                {
+                    playhead[0]++;
+                    if (playhead[0] >= audioDataEmm.GetLength())
+                        playhead[0] = audioDataEmm.GetLength() - 1;
+                    playhead[1] = playhead[0];
+                }
+                else if (e.KeyCode == Keys.Left)
+                {
+                    float playheadSeconds = (float)playhead[0] / sampleRate;
+                    int startIndex = GetBeatIndex(playheadSeconds);
+                    if (startIndex < 0)
+                    {
+                        playhead[0] = 0;
+                        playhead[1] = 0;
+                        return;
+                    }
+                    if (startIndex >= beatmap.Count || beatmap[startIndex] >= playheadSeconds)
+                        startIndex--;
+                    if (startIndex < 0)
+                    {
+                        playhead[0] = 0;
+                        playhead[1] = 0;
+                        return;
+                    }
+                    playhead[0] = (int)MathF.Floor(beatmap[startIndex] * sampleRate);
+                    playhead[1] = playhead[0];
+                }
+                else
+                {
+                    float playheadSeconds = (float)playhead[0] / sampleRate;
+                    int startIndex = GetBeatIndex(playheadSeconds);
+                    if (startIndex >= beatmap.Count)
+                    {
+                        playhead[0] = audioDataEmm.GetLength() - 1;
+                        playhead[1] = playhead[0];
+                        return;
+                    }
+                    if (startIndex < 0 || beatmap[startIndex] <= playheadSeconds)
+                        startIndex++;
+                    if (startIndex >= beatmap.Count)
+                    {
+                        playhead[0] = audioDataEmm.GetLength() - 1;
+                        playhead[1] = playhead[0];
+                        return;
+                    }
+                    playhead[0] = (int)MathF.Floor(beatmap[startIndex] * sampleRate);
+                    playhead[1] = playhead[0];
+                }
             }
         }
 
@@ -603,6 +671,22 @@ namespace Retempo2
             int startIndex = GetBeatIndex(startSeconds);
             // Insert the new list
             beatmap.InsertRange(startIndex, newBeats);
+            AudioVis.Refresh();
+        }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (audioDataEmm == null)
+                return;
+
+            if (beatmap == null)
+                return;
+
+            if (aStream.IsPlaying())
+                return;
+
+            playhead[0] = 0;
+            playhead[1] = audioDataEmm.GetLength() - 1;
             AudioVis.Refresh();
         }
     }
