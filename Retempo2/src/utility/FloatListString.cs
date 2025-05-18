@@ -21,7 +21,7 @@
             foreach (string word in words)
             {
                 float val;
-                if (float.TryParse(str, out val))
+                if (float.TryParse(word, out val))
                     output.Add(val);
             }
             return output.ToArray();

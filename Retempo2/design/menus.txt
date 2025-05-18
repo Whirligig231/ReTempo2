@@ -14,10 +14,10 @@ x &Close Window Ctrl+W
 &Undo Ctrl+Z
 &Redo Ctrl+Y
 -
-Cu&t Ctrl+X
-&Copy Ctrl+C
-&Paste Ctrl+V
-&Delete Delete
+x Cu&t Ctrl+X
+x &Copy Ctrl+C
+x &Paste Ctrl+V
+x &Delete Delete
 -
 x Select &All Ctrl+A
 

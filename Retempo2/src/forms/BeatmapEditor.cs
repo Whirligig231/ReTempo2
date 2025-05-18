@@ -726,6 +726,95 @@ namespace Retempo2
                 beatmap.RemoveAt(startIndex);
         }
 
+        private string GetBeatsInRange(float startSeconds, float lengthSeconds)
+        {
+            if (beatmap == null)
+                return "";
+            int index = GetBeatIndex(startSeconds);
+
+            List<float> beatsInRange = new List<float>();
+
+            // Delete beats in the affected area
+            while (index < beatmap.Count && beatmap[index] <= (startSeconds + lengthSeconds))
+            {
+                beatsInRange.Add(beatmap[index] - startSeconds);
+                index++;
+            }
+
+            return FloatListString.FloatsToString(beatsInRange);
+        }
+
+        private float SetBeatsAtPoint(float startSeconds, float lengthSeconds, string beats)
+        {
+            if (beatmap == null)
+                return lengthSeconds;
+
+            float[] newBeats = FloatListString.StringToFloats(beats);
+            if (newBeats.Length == 0)
+                return lengthSeconds;
+
+            if (newBeats[newBeats.Length - 1] > lengthSeconds)
+                lengthSeconds = newBeats[newBeats.Length - 1];
+
+            DeleteBeatsInRange(startSeconds, lengthSeconds);
+            int index = GetBeatIndex(startSeconds);
+            for (int i = newBeats.Length - 1; i >= 0; i--)
+            {
+                float beat = newBeats[i] + startSeconds;
+                beatmap.Insert(index, beat);
+            }
+
+            return lengthSeconds;
+        }
+
+        private void DeletePlayheadBeats()
+        {
+            if (beatmap == null)
+                return;
+            if (playhead[1] == playhead[0])
+                return;
+            float startSeconds = (float)playhead[0] / sampleRate;
+            float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
+            DeleteBeatsInRange(startSeconds, lengthSeconds);
+            AudioVis.Refresh();
+        }
+
+        private void CopyPlayheadBeats()
+        {
+            if (beatmap == null)
+                return;
+            if (playhead[1] == playhead[0])
+                return;
+            float startSeconds = (float)playhead[0] / sampleRate;
+            float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
+            string text = GetBeatsInRange(startSeconds, lengthSeconds);
+            if (text != "")
+                Clipboard.SetText(text);
+            else
+                Clipboard.Clear();
+            AudioVis.Refresh();
+        }
+
+        private void CutPlayheadBeats()
+        {
+            CopyPlayheadBeats();
+            DeletePlayheadBeats();
+        }
+
+        private void PastePlayheadBeats()
+        {
+            if (beatmap == null)
+                return;
+            float startSeconds = (float)playhead[0] / sampleRate;
+            float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
+            float newLengthSeconds = SetBeatsAtPoint(startSeconds, lengthSeconds, Clipboard.GetText());
+            if (newLengthSeconds > lengthSeconds)
+            {
+                playhead[1] = (int)MathF.Floor(playhead[0] + newLengthSeconds * sampleRate);
+            }
+            AudioVis.Refresh();
+        }
+
         private void FillManualTempoBeats(float beats)
         {
             if (beatmap == null)
@@ -905,6 +994,26 @@ namespace Retempo2
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CutPlayheadBeats();
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CopyPlayheadBeats();
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PastePlayheadBeats();
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeletePlayheadBeats();
         }
     }
 }
