@@ -16,7 +16,8 @@ namespace Retempo2
         private int[] playhead; // Frame number of playhead start and end
         private int startFrame, numFrames; // In the current window
 
-        private Timer playTimer; // Timer to manage playback visuals and beat ticks
+        private Timer visualPlayTimer; // Timer to manage playback visuals
+        private Timer audioPlayTimer; // Timer to manage beat ticks
         private int currentBeatmapIndex; // Position of the playhead in the beatmap
         private int previousFrame; // Time of the previous frame
         private SoundPlayer clickSound;
@@ -37,9 +38,13 @@ namespace Retempo2
             aStream = new AudioStream();
             AudioVisScroll.Maximum = 0;
 
-            playTimer = new Timer();
-            playTimer.Interval = 20;
-            playTimer.Tick += PlayTimer_Tick;
+            visualPlayTimer = new Timer();
+            visualPlayTimer.Interval = 20;
+            visualPlayTimer.Tick += VisualPlayTimer_Tick;
+
+            audioPlayTimer = new Timer();
+            audioPlayTimer.Interval = 1;
+            audioPlayTimer.Tick += AudioPlayTimer_Tick;
 
             clickSound = new SoundPlayer(new MemoryStream(Properties.Resources.click));
 
@@ -54,13 +59,15 @@ namespace Retempo2
             previousFrame = playhead[0];
             currentBeatmapIndex = 0;
             aStream.Play();
-            playTimer.Start();
+            visualPlayTimer.Start();
+            audioPlayTimer.Start();
         }
 
         private void StopAudio()
         {
             aStream.Stop();
-            playTimer.Stop();
+            visualPlayTimer.Stop();
+            audioPlayTimer.Stop();
             AudioVis.Refresh();
         }
 
@@ -123,10 +130,15 @@ namespace Retempo2
         {
             Graphics g = e.Graphics;
 
+            // Draw waveform
+            Brush blue = new SolidBrush(Color.Blue);
+            if (audioFileSamples != null)
+                WaveformDrawing.DrawWaveform(g, blue, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, startFrame, numFrames);
+
             // Draw selection
             if (audioDataEmm != null)
             {
-                Brush gray = new SolidBrush(Color.LightGray);
+                Brush gray = new SolidBrush(Color.FromArgb(51, 0, 0, 0));
                 int selectStart = int.Max(playhead[0], startFrame);
                 int selectEnd = int.Min(playhead[1], startFrame + numFrames - 1);
                 if (selectStart < startFrame + numFrames && selectEnd >= startFrame)
@@ -138,16 +150,11 @@ namespace Retempo2
                     g.FillRectangle(gray, fracAPixel, 0, fracBPixel - fracAPixel, AudioVis.Height);
                 }
             }
-
-            // Draw waveform
-            Brush blue = new SolidBrush(Color.Blue);
-            if (audioFileSamples != null)
-                WaveformDrawing.DrawWaveform(g, blue, 0, 0, AudioVis.Width, AudioVis.Height, audioDataEmm, startFrame, numFrames);
-
+            
             // Draw beats
             if (audioDataEmm != null && beatmap != null)
             {
-                Brush red = new SolidBrush(Color.Red);
+                Brush red = new SolidBrush(Color.FromArgb(153, 255, 0, 0));
                 Pen redPen = new Pen(red);
                 for (int i = 0; i < beatmap.Count; i++)
                 {
@@ -240,10 +247,13 @@ namespace Retempo2
             AudioVis.Refresh();
         }
 
-        private void PlayTimer_Tick(object? sender, EventArgs e)
+        private void VisualPlayTimer_Tick(object? sender, EventArgs e)
         {
             AudioVis.Refresh();
+        }
 
+        private void AudioPlayTimer_Tick(object? sender, EventArgs e)
+        {
             // Check for beat
             if (audioDataEmm == null || beatmap == null)
                 return;
