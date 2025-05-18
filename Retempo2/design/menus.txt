@@ -19,18 +19,18 @@ Cu&t Ctrl+X
 &Paste Ctrl+V
 &Delete Delete
 -
-Select &All Ctrl+A
+x Select &All Ctrl+A
 
 &PLAYHEAD
-&Play/Stop (Space)
-&Restart Playback (Shift+Space)
+x &Play/Stop (Space)
+x &Restart Playback (Shift+Space)
 -
-To &Start Ctrl+Left
-To &End Ctrl+Right
-To &Prev Frame (Left)
-To Next &Frame (Right)
-To Prev Bea&t (Shift+Left)
-To Next &Beat (Shift+Right)
+x To &Start Ctrl+Left
+x To &End Ctrl+Right
+x To &Prev Frame (Left)
+x To Next &Frame (Right)
+x To Prev Bea&t (Shift+Left)
+x To Next &Beat (Shift+Right)
 
 &TOOLS
 &Map Beats By Tempo... Ctrl+M

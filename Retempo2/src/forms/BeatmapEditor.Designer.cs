@@ -64,8 +64,6 @@
             restartPlaybackToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator5 = new ToolStripSeparator();
             toStartToolStripMenuItem = new ToolStripMenuItem();
-            helpToolStripMenuItem = new ToolStripMenuItem();
-            aboutToolStripMenuItem = new ToolStripMenuItem();
             toEndToolStripMenuItem = new ToolStripMenuItem();
             toPrevFrameToolStripMenuItem = new ToolStripMenuItem();
             toNextFrameToolStripMenuItem = new ToolStripMenuItem();
@@ -74,8 +72,10 @@
             toolsToolStripMenuItem = new ToolStripMenuItem();
             mapBeatsByTempoToolStripMenuItem = new ToolStripMenuItem();
             detectBeatsToolStripMenuItem = new ToolStripMenuItem();
+            helpToolStripMenuItem = new ToolStripMenuItem();
             showREADMEToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
+            aboutToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)AudioVis).BeginInit();
             MenuStrip.SuspendLayout();
             SuspendLayout();
@@ -341,12 +341,14 @@
             playStopToolStripMenuItem.Name = "playStopToolStripMenuItem";
             playStopToolStripMenuItem.Size = new Size(180, 22);
             playStopToolStripMenuItem.Text = "&Play/Stop";
+            playStopToolStripMenuItem.Click += playStopToolStripMenuItem_Click;
             // 
             // restartPlaybackToolStripMenuItem
             // 
             restartPlaybackToolStripMenuItem.Name = "restartPlaybackToolStripMenuItem";
             restartPlaybackToolStripMenuItem.Size = new Size(180, 22);
             restartPlaybackToolStripMenuItem.Text = "&Restart Playback";
+            restartPlaybackToolStripMenuItem.Click += restartPlaybackToolStripMenuItem_Click;
             // 
             // toolStripSeparator5
             // 
@@ -359,19 +361,7 @@
             toStartToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Left;
             toStartToolStripMenuItem.Size = new Size(180, 22);
             toStartToolStripMenuItem.Text = "To &Start";
-            // 
-            // helpToolStripMenuItem
-            // 
-            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showREADMEToolStripMenuItem, toolStripSeparator6, aboutToolStripMenuItem });
-            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            helpToolStripMenuItem.Size = new Size(44, 20);
-            helpToolStripMenuItem.Text = "&Help";
-            // 
-            // aboutToolStripMenuItem
-            // 
-            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(116, 22);
-            aboutToolStripMenuItem.Text = "&About...";
+            toStartToolStripMenuItem.Click += toStartToolStripMenuItem_Click;
             // 
             // toEndToolStripMenuItem
             // 
@@ -379,30 +369,35 @@
             toEndToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Right;
             toEndToolStripMenuItem.Size = new Size(180, 22);
             toEndToolStripMenuItem.Text = "To &End";
+            toEndToolStripMenuItem.Click += toEndToolStripMenuItem_Click;
             // 
             // toPrevFrameToolStripMenuItem
             // 
             toPrevFrameToolStripMenuItem.Name = "toPrevFrameToolStripMenuItem";
             toPrevFrameToolStripMenuItem.Size = new Size(180, 22);
             toPrevFrameToolStripMenuItem.Text = "To &Prev Frame";
+            toPrevFrameToolStripMenuItem.Click += toPrevFrameToolStripMenuItem_Click;
             // 
             // toNextFrameToolStripMenuItem
             // 
             toNextFrameToolStripMenuItem.Name = "toNextFrameToolStripMenuItem";
             toNextFrameToolStripMenuItem.Size = new Size(180, 22);
             toNextFrameToolStripMenuItem.Text = "To &Next Frame";
+            toNextFrameToolStripMenuItem.Click += toNextFrameToolStripMenuItem_Click;
             // 
             // toPrevBeatToolStripMenuItem
             // 
             toPrevBeatToolStripMenuItem.Name = "toPrevBeatToolStripMenuItem";
             toPrevBeatToolStripMenuItem.Size = new Size(180, 22);
             toPrevBeatToolStripMenuItem.Text = "To Prev Bea&t";
+            toPrevBeatToolStripMenuItem.Click += toPrevBeatToolStripMenuItem_Click;
             // 
             // toNextBeatToolStripMenuItem
             // 
             toNextBeatToolStripMenuItem.Name = "toNextBeatToolStripMenuItem";
             toNextBeatToolStripMenuItem.Size = new Size(180, 22);
             toNextBeatToolStripMenuItem.Text = "To Next &Beat";
+            toNextBeatToolStripMenuItem.Click += toNextBeatToolStripMenuItem_Click;
             // 
             // toolsToolStripMenuItem
             // 
@@ -425,6 +420,13 @@
             detectBeatsToolStripMenuItem.Size = new Size(238, 22);
             detectBeatsToolStripMenuItem.Text = "&Detect Beats";
             // 
+            // helpToolStripMenuItem
+            // 
+            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showREADMEToolStripMenuItem, toolStripSeparator6, aboutToolStripMenuItem });
+            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            helpToolStripMenuItem.Size = new Size(44, 20);
+            helpToolStripMenuItem.Text = "&Help";
+            // 
             // showREADMEToolStripMenuItem
             // 
             showREADMEToolStripMenuItem.Name = "showREADMEToolStripMenuItem";
@@ -436,6 +438,12 @@
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
             toolStripSeparator6.Size = new Size(168, 6);
+            // 
+            // aboutToolStripMenuItem
+            // 
+            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            aboutToolStripMenuItem.Size = new Size(171, 22);
+            aboutToolStripMenuItem.Text = "&About...";
             // 
             // BeatmapEditor
             // 

@@ -82,6 +82,143 @@ namespace Retempo2
 
         }
 
+        private void SeekToStart()
+        {
+            bool playing = aStream.IsPlaying();
+            if (playing)
+                StopAudio();
+
+            playhead[0] = 0;
+            playhead[1] = 0;
+
+            if (playing)
+                PlayAudio();
+
+            AudioVis.Refresh();
+        }
+
+        private void SeekToEnd()
+        {
+            if (audioDataEmm == null)
+                return;
+
+            bool playing = aStream.IsPlaying();
+            if (playing)
+                StopAudio();
+
+            playhead[0] = audioDataEmm.GetLength() - 1;
+            playhead[1] = playhead[0];
+
+            if (playing)
+                PlayAudio();
+
+            AudioVis.Refresh();
+        }
+
+        private void SeekToPrevFrame()
+        {
+            if (audioDataEmm == null)
+                return;
+
+            if (beatmap == null)
+                return;
+
+            if (aStream.IsPlaying())
+                return;
+
+            playhead[0]--;
+            if (playhead[0] < 0)
+                playhead[0] = 0;
+            playhead[1] = playhead[0];
+
+            AudioVis.Refresh();
+        }
+
+        private void SeekToNextFrame()
+        {
+            if (audioDataEmm == null)
+                return;
+
+            if (beatmap == null)
+                return;
+
+            if (aStream.IsPlaying())
+                return;
+
+            playhead[0]++;
+            if (playhead[0] >= audioDataEmm.GetLength())
+                playhead[0] = audioDataEmm.GetLength() - 1;
+            playhead[1] = playhead[0];
+
+            AudioVis.Refresh();
+        }
+
+        private void SeekToPrevBeat()
+        {
+            if (audioDataEmm == null)
+                return;
+
+            if (beatmap == null)
+                return;
+
+            if (aStream.IsPlaying())
+                return;
+
+            float playheadSeconds = (float)playhead[0] / sampleRate;
+            int startIndex = GetBeatIndex(playheadSeconds);
+            if (startIndex < 0)
+            {
+                playhead[0] = 0;
+                playhead[1] = 0;
+                return;
+            }
+            if (startIndex >= beatmap.Count || beatmap[startIndex] >= playheadSeconds)
+                startIndex--;
+            if (startIndex < 0)
+            {
+                playhead[0] = 0;
+                playhead[1] = 0;
+                return;
+            }
+            playhead[0] = (int)MathF.Floor(beatmap[startIndex] * sampleRate);
+            playhead[1] = playhead[0];
+
+            AudioVis.Refresh();
+        }
+
+        private void SeekToNextBeat()
+        {
+            if (audioDataEmm == null)
+                return;
+
+            if (beatmap == null)
+                return;
+
+            if (aStream.IsPlaying())
+                return;
+
+            float playheadSeconds = (float)playhead[0] / sampleRate;
+            int startIndex = GetBeatIndex(playheadSeconds);
+            if (startIndex >= beatmap.Count)
+            {
+                playhead[0] = audioDataEmm.GetLength() - 1;
+                playhead[1] = playhead[0];
+                return;
+            }
+            if (startIndex < 0 || beatmap[startIndex] <= playheadSeconds + 1.0f / sampleRate)
+                startIndex++;
+            if (startIndex >= beatmap.Count)
+            {
+                playhead[0] = audioDataEmm.GetLength() - 1;
+                playhead[1] = playhead[0];
+                return;
+            }
+            playhead[0] = (int)MathF.Floor(beatmap[startIndex] * sampleRate);
+            playhead[1] = playhead[0];
+
+            AudioVis.Refresh();
+        }
+
         private void BeatmapEditor_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Space)
@@ -93,70 +230,21 @@ namespace Retempo2
             }
             else if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
             {
-                if (audioDataEmm == null)
-                    return;
-
-                if (beatmap == null)
-                    return;
-
-                if (aStream.IsPlaying())
-                    return;
-
                 if (e.KeyCode == Keys.Left && (e.Modifiers & Keys.Shift) == 0)
                 {
-                    playhead[0]--;
-                    if (playhead[0] < 0)
-                        playhead[0] = 0;
-                    playhead[1] = playhead[0];
+                    SeekToPrevFrame();
                 }
                 else if (e.KeyCode == Keys.Right && (e.Modifiers & Keys.Shift) == 0)
                 {
-                    playhead[0]++;
-                    if (playhead[0] >= audioDataEmm.GetLength())
-                        playhead[0] = audioDataEmm.GetLength() - 1;
-                    playhead[1] = playhead[0];
+                    SeekToNextFrame();
                 }
                 else if (e.KeyCode == Keys.Left)
                 {
-                    float playheadSeconds = (float)playhead[0] / sampleRate;
-                    int startIndex = GetBeatIndex(playheadSeconds);
-                    if (startIndex < 0)
-                    {
-                        playhead[0] = 0;
-                        playhead[1] = 0;
-                        return;
-                    }
-                    if (startIndex >= beatmap.Count || beatmap[startIndex] >= playheadSeconds)
-                        startIndex--;
-                    if (startIndex < 0)
-                    {
-                        playhead[0] = 0;
-                        playhead[1] = 0;
-                        return;
-                    }
-                    playhead[0] = (int)MathF.Floor(beatmap[startIndex] * sampleRate);
-                    playhead[1] = playhead[0];
+                    SeekToPrevBeat();
                 }
                 else
                 {
-                    float playheadSeconds = (float)playhead[0] / sampleRate;
-                    int startIndex = GetBeatIndex(playheadSeconds);
-                    if (startIndex >= beatmap.Count)
-                    {
-                        playhead[0] = audioDataEmm.GetLength() - 1;
-                        playhead[1] = playhead[0];
-                        return;
-                    }
-                    if (startIndex < 0 || beatmap[startIndex] <= playheadSeconds)
-                        startIndex++;
-                    if (startIndex >= beatmap.Count)
-                    {
-                        playhead[0] = audioDataEmm.GetLength() - 1;
-                        playhead[1] = playhead[0];
-                        return;
-                    }
-                    playhead[0] = (int)MathF.Floor(beatmap[startIndex] * sampleRate);
-                    playhead[1] = playhead[0];
+                    SeekToNextBeat();
                 }
             }
         }
@@ -322,21 +410,6 @@ namespace Retempo2
         private void VisualPlayTimer_Tick(object? sender, EventArgs e)
         {
             AudioVis.Refresh();
-        }
-
-        private void AudioPlayTimer_Tick(object? sender, EventArgs e)
-        {
-            // Check for beat
-            if (audioDataEmm == null || beatmap == null)
-                return;
-            int currentFrame = (int)((aStream.NumFramesPlayed() + playhead[0]) % audioDataEmm.GetLength());
-            while (currentBeatmapIndex < beatmap.Count && beatmap[currentBeatmapIndex] < (float)previousFrame / sampleRate)
-                currentBeatmapIndex++;
-            if (currentBeatmapIndex >= beatmap.Count)
-                return;
-            // if (beatmap[currentBeatmapIndex] < (float)currentFrame / sampleRate)
-            //     clickSound.Play();
-            previousFrame = currentFrame;
         }
 
         private bool WithinSnapThresholdFrames(float framesA, float framesB)
@@ -555,17 +628,7 @@ namespace Retempo2
 
         private void SeekStartButton_Click(object sender, EventArgs e)
         {
-            bool playing = aStream.IsPlaying();
-            if (playing)
-                StopAudio();
-
-            playhead[0] = 0;
-            playhead[1] = 0;
-
-            if (playing)
-                PlayAudio();
-
-            AudioVis.Refresh();
+            SeekToStart();
         }
 
         private int GetBeatIndex(float startSeconds)
@@ -688,6 +751,50 @@ namespace Retempo2
             playhead[0] = 0;
             playhead[1] = audioDataEmm.GetLength() - 1;
             AudioVis.Refresh();
+        }
+
+        private void playStopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (aStream.IsPlaying())
+                StopAudio();
+            else
+                PlayAudio();
+        }
+
+        private void restartPlaybackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PlayAudio();
+        }
+
+        private void toStartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeekToStart();
+        }
+
+        private void toEndToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeekToEnd();
+        }
+
+        private void toPrevFrameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeekToPrevFrame();
+
+        }
+
+        private void toNextFrameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeekToNextFrame();
+        }
+
+        private void toPrevBeatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeekToPrevBeat();
+        }
+
+        private void toNextBeatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SeekToNextBeat();
         }
     }
 }
