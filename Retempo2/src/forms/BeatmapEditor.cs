@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Media;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using PortAudioSharp;
 using Timer = System.Windows.Forms.Timer;
 
@@ -13,15 +14,16 @@ namespace Retempo2
         private float[]? audioFileSamples; // The audio data
         private List<float>? beatmap; // List of times of beats, in seconds
         private EfficientMinMax? audioDataEmm; // Stores audio data for visuals
-        private SimpleArrayGenerator? sag; // Generates the audio stream
+        private ArrayWithBeatsGenerator? generator; // Generates the audio stream
         private int[] playhead; // Frame number of playhead start and end
         private int startFrame, numFrames; // In the current window
 
         private Timer visualPlayTimer; // Timer to manage playback visuals
-        private Timer audioPlayTimer; // Timer to manage beat ticks
+        // private Timer audioPlayTimer; // Timer to manage beat ticks
         private int currentBeatmapIndex; // Position of the playhead in the beatmap
         private int previousFrame; // Time of the previous frame
-        private SoundPlayer clickSound;
+        // private SoundPlayer clickSound;
+        private float[] clickSoundSamples; // Click sound
 
         private const float sampleRate = 44100.0f; // TODO
 
@@ -43,32 +45,35 @@ namespace Retempo2
             visualPlayTimer.Interval = 20;
             visualPlayTimer.Tick += VisualPlayTimer_Tick;
 
-            audioPlayTimer = new Timer();
-            audioPlayTimer.Interval = 1;
-            audioPlayTimer.Tick += AudioPlayTimer_Tick;
+            // audioPlayTimer = new Timer();
+            // audioPlayTimer.Interval = 1;
+            // audioPlayTimer.Tick += AudioPlayTimer_Tick;
 
-            clickSound = new SoundPlayer(new MemoryStream(Properties.Resources.click));
+            // clickSound = new SoundPlayer(new MemoryStream(Properties.Resources.click));
+
+            // Load the click sound as an array
+            clickSoundSamples = AudioFileHandling.LoadMFRFile(FilePaths.Include("click.wav")) ?? [];
 
             playhead = new int[2];
         }
 
         private void PlayAudio()
         {
-            if (sag == null)
+            if (generator == null)
                 return;
-            sag.playheadStartFrame = playhead[0];
+            generator.playheadStartFrame = playhead[0];
             previousFrame = playhead[0];
             currentBeatmapIndex = 0;
             aStream.Play();
             visualPlayTimer.Start();
-            audioPlayTimer.Start();
+            // audioPlayTimer.Start(); Legacy code
         }
 
         private void StopAudio()
         {
             aStream.Stop();
             visualPlayTimer.Stop();
-            audioPlayTimer.Stop();
+            // audioPlayTimer.Stop(); Legacy code
             AudioVis.Refresh();
         }
 
@@ -115,14 +120,12 @@ namespace Retempo2
             startFrame = 0;
             numFrames = audioDataEmm.GetLength();
             aStream.Stop();
-            sag = new SimpleArrayGenerator(audioFileSamples);
-            aStream.SetCallback(sag.Callback);
+            beatmap = [];
+            generator = new ArrayWithBeatsGenerator(audioFileSamples, beatmap, clickSoundSamples);
+            aStream.SetCallback(generator.Callback);
 
             playhead[0] = 0;
             playhead[1] = 0;
-
-            // Beatmap starts empty
-            beatmap = [];
 
             AudioVis.Refresh();
         }
@@ -263,8 +266,8 @@ namespace Retempo2
                 currentBeatmapIndex++;
             if (currentBeatmapIndex >= beatmap.Count)
                 return;
-            if (beatmap[currentBeatmapIndex] < (float)currentFrame / sampleRate)
-                clickSound.Play();
+            // if (beatmap[currentBeatmapIndex] < (float)currentFrame / sampleRate)
+            //     clickSound.Play();
             previousFrame = currentFrame;
         }
 

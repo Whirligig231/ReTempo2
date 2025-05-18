@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="include\click.wav" />
+    <None Remove="SFX\click.wav" />
     <None Remove="vamp\beatroot-vamp.dll" />
     <None Remove="vamp\libsndfile-1.dll" />
     <None Remove="vamp\vamp-example-plugins.dll" />
@@ -18,6 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="include\click.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SFX\click.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="vamp\beatroot-vamp.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
