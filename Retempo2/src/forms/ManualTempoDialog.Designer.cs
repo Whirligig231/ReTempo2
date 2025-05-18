@@ -117,6 +117,7 @@
             Controls.Add(SecondsLabel);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Name = "ManualTempoDialog";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Map Beats by Tempo";
             ResumeLayout(false);
             PerformLayout();
