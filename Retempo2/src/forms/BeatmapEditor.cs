@@ -10,6 +10,11 @@ namespace Retempo2
 {
     public partial class BeatmapEditor : Form
     {
+        private record UndoEntry(float[] beatsAdded, float[] beatsRemoved);
+        private List<UndoEntry> undoHistory; // List of differential undo states
+        private int undoCurrentIndex; // Most recent state that hasn't been executed
+        private int undoSavedIndex; // Most recent state that hasn't been saved
+
         private AudioStream aStream; // The internal audio stream
         private string? audioFname; // Name of the audio file
         private float[]? audioFileSamples; // The audio data
@@ -31,6 +36,7 @@ namespace Retempo2
         private int draggingBeatIndex = -1; // Index of the currently dragged beat
         private bool dragBeatHasMoved = false; // Has the currently dragged beat moved?
         private bool dragBeatIsRemovable = false; // Should we remove the dragged beat?
+        private float dragBeatOldValue = 0; // Old value of dragged beat
 
         private int draggingPlayheadIndex = -1; // Index of the currently dragged playhead
         private bool dragPlayheadHasMoved = false; // Has the currently dragged playhead moved?
@@ -54,6 +60,10 @@ namespace Retempo2
 
             // Load the click sound as an array
             clickSoundSamples = AudioFileHandling.LoadMFRFile(FilePaths.Include("click.wav")) ?? [];
+
+            undoCurrentIndex = 0;
+            undoSavedIndex = 0;
+            undoHistory = new List<UndoEntry>();
 
             playhead = new int[2];
         }
@@ -260,6 +270,89 @@ namespace Retempo2
             StopAudio();
         }
 
+        private void ClearUndoHistory()
+        {
+            undoCurrentIndex = 0;
+            undoSavedIndex = 0;
+            undoHistory.Clear();
+        }
+
+        private void MarkUndoHistoryAsSaved()
+        {
+            undoSavedIndex = undoCurrentIndex;
+        }
+
+        private void AddToUndoHistory(IEnumerable<float> added, IEnumerable<float> removed)
+        {
+            UndoEntry newEntry = new UndoEntry(added.ToArray(), removed.ToArray());
+
+            if (undoCurrentIndex < undoHistory.Count)
+            {
+                undoHistory.RemoveRange(undoCurrentIndex, undoHistory.Count - undoCurrentIndex);
+            }
+
+            undoHistory.Add(newEntry);
+            undoCurrentIndex++;
+        }
+
+        private void Undo()
+        {
+            if (beatmap == null)
+                return;
+            if (audioDataEmm == null)
+                return;
+            if (aStream.IsPlaying())
+                return;
+            if (undoCurrentIndex == 0)
+                return;
+
+            undoCurrentIndex--;
+
+            UndoEntry entry = undoHistory[undoCurrentIndex];
+            foreach (float beatToRemove in entry.beatsAdded)
+            {
+                beatmap.Remove(beatToRemove);
+            }
+            foreach (float beatToAdd in entry.beatsRemoved)
+            {
+                if (beatToAdd * sampleRate >= audioDataEmm.GetLength())
+                    continue;
+                int index = GetBeatIndex(beatToAdd);
+                beatmap.Insert(index, beatToAdd);
+            }
+
+            AudioVis.Refresh();
+        }
+
+        private void Redo()
+        {
+            if (beatmap == null)
+                return;
+            if (audioDataEmm == null)
+                return;
+            if (aStream.IsPlaying())
+                return;
+            if (undoCurrentIndex == undoHistory.Count)
+                return;
+
+            UndoEntry entry = undoHistory[undoCurrentIndex];
+            foreach (float beatToRemove in entry.beatsRemoved)
+            {
+                beatmap.Remove(beatToRemove);
+            }
+            foreach (float beatToAdd in entry.beatsAdded)
+            {
+                if (beatToAdd * sampleRate >= audioDataEmm.GetLength())
+                    continue;
+                int index = GetBeatIndex(beatToAdd);
+                beatmap.Insert(index, beatToAdd);
+            }
+
+            undoCurrentIndex++;
+
+            AudioVis.Refresh();
+        }
+
         private void TrimBeatmap()
         {
             if (audioDataEmm == null)
@@ -345,6 +438,8 @@ namespace Retempo2
             numFrames = audioDataEmm.GetLength();
             playhead[0] = 0;
             playhead[1] = 0;
+
+            ClearUndoHistory();
 
             AudioVis.Refresh();
         }
@@ -586,6 +681,7 @@ namespace Retempo2
                 if (snapBeat >= 0)
                 {
                     draggingBeatIndex = snapBeat;
+                    dragBeatOldValue = beatmap[snapBeat];
                     dragBeatIsRemovable = true;
                 }
                 else
@@ -597,6 +693,7 @@ namespace Retempo2
                         newIndex++;
                     beatmap.Insert(newIndex, mouseSeconds);
                     draggingBeatIndex = newIndex;
+                    dragBeatOldValue = float.NaN;
                     dragBeatIsRemovable = false;
                 }
             }
@@ -678,7 +775,18 @@ namespace Retempo2
             if (draggingBeatIndex >= 0)
             {
                 if (dragBeatIsRemovable && !dragBeatHasMoved)
+                {
                     beatmap.RemoveAt(draggingBeatIndex);
+                    AddToUndoHistory([], [dragBeatOldValue]);
+                }
+                else if (float.IsNaN(dragBeatOldValue))
+                {
+                    AddToUndoHistory([beatmap[draggingBeatIndex]], []);
+                }
+                else
+                {
+                    AddToUndoHistory([beatmap[draggingBeatIndex]], [dragBeatOldValue]);
+                }
                 draggingBeatIndex = -1;
 
                 AudioVis.Refresh();
@@ -715,15 +823,25 @@ namespace Retempo2
             return startIndex;
         }
 
-        private void DeleteBeatsInRange(float startSeconds, float lengthSeconds)
+        private float[] DeleteBeatsInRange(float startSeconds, float lengthSeconds, bool makeUndoEntry = true)
         {
             if (beatmap == null)
-                return;
+                return [];
             int startIndex = GetBeatIndex(startSeconds);
+
+            List<float> removed = new List<float>();
 
             // Delete beats in the affected area
             while (startIndex < beatmap.Count && beatmap[startIndex] <= (startSeconds + lengthSeconds))
+            {
+                removed.Add(beatmap[startIndex]);
                 beatmap.RemoveAt(startIndex);
+            }
+
+            if (makeUndoEntry)
+                AddToUndoHistory([], removed);
+
+            return removed.ToArray();
         }
 
         private string GetBeatsInRange(float startSeconds, float lengthSeconds)
@@ -756,13 +874,17 @@ namespace Retempo2
             if (newBeats[newBeats.Length - 1] > lengthSeconds)
                 lengthSeconds = newBeats[newBeats.Length - 1];
 
-            DeleteBeatsInRange(startSeconds, lengthSeconds);
+            float[] removed = DeleteBeatsInRange(startSeconds, lengthSeconds, false);
+            List<float> added = new List<float>();
             int index = GetBeatIndex(startSeconds);
             for (int i = newBeats.Length - 1; i >= 0; i--)
             {
                 float beat = newBeats[i] + startSeconds;
+                added.Add(beat);
                 beatmap.Insert(index, beat);
             }
+
+            AddToUndoHistory(added, removed);
 
             return lengthSeconds;
         }
@@ -822,7 +944,7 @@ namespace Retempo2
             float startSeconds = (float)playhead[0] / sampleRate;
             float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
 
-            DeleteBeatsInRange(startSeconds, lengthSeconds);
+            float[] removed = DeleteBeatsInRange(startSeconds, lengthSeconds, false);
 
             // Make a list of new beats
             List<float> newBeats = new List<float>();
@@ -834,6 +956,9 @@ namespace Retempo2
             int startIndex = GetBeatIndex(startSeconds);
             // Insert the new list
             beatmap.InsertRange(startIndex, newBeats);
+
+            AddToUndoHistory(newBeats, removed);
+
             AudioVis.Refresh();
         }
 
@@ -884,7 +1009,7 @@ namespace Retempo2
             float startSeconds = (float)playhead[0] / sampleRate;
             float lengthSeconds = (float)(playhead[1] - playhead[0]) / sampleRate;
 
-            DeleteBeatsInRange(startSeconds, lengthSeconds);
+            float[] removed = DeleteBeatsInRange(startSeconds, lengthSeconds, false);
 
             // Make a list of new beats
             List<float> newBeats = new List<float>();
@@ -896,6 +1021,9 @@ namespace Retempo2
             int startIndex = GetBeatIndex(startSeconds);
             // Insert the new list
             beatmap.InsertRange(startIndex, newBeats);
+
+            AddToUndoHistory(newBeats, removed);
+
             AudioVis.Refresh();
         }
 
@@ -1014,6 +1142,16 @@ namespace Retempo2
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DeletePlayheadBeats();
+        }
+
+        private void undoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Undo();
+        }
+
+        private void redoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Redo();
         }
     }
 }

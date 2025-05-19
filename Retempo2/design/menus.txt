@@ -11,8 +11,8 @@ x &Reload Sample Ctrl+R
 x &Close Window Ctrl+W
 
 &EDIT
-&Undo Ctrl+Z
-&Redo Ctrl+Y
+x &Undo Ctrl+Z
+x &Redo Ctrl+Y
 -
 x Cu&t Ctrl+X
 x &Copy Ctrl+C
@@ -33,8 +33,8 @@ x To Prev Bea&t (Shift+Left)
 x To Next &Beat (Shift+Right)
 
 &TOOLS
-&Map Beats by Tempo... Ctrl+M
-&Detect Beats Ctrl+B
+x &Map Beats by Tempo... Ctrl+M
+x &Detect Beats Ctrl+B
 
 &HELP
 Show &README F1
