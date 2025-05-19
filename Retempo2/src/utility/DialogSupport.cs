@@ -5,7 +5,7 @@ namespace Retempo2
         public static string? GetAudioOpenFname()
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Audio files(*.aac;*.mp3;*.m4a;*.wav;*.ogg)|*.AAC;*.MP3;*.M4A;*.WAV;*.OGG|All files (*.*)|*.*";
+            ofd.Filter = "Audio files (*.aac;*.mp3;*.m4a;*.wav;*.ogg)|*.aac;*.mp3;*.m4a;*.wav;*.ogg|All files (*.*)|*.*";
             ofd.RestoreDirectory = true;
             DialogResult res = ofd.ShowDialog();
             if (res == DialogResult.OK)
@@ -17,7 +17,7 @@ namespace Retempo2
         public static string? GetBeatmapOpenFname()
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Beatmap files(*.rtbm)|*.RTBM|All files (*.*)|*.*";
+            ofd.Filter = "Beatmap files (*.rtbm)|*.rtbm|All files (*.*)|*.*";
             ofd.RestoreDirectory = true;
             DialogResult res = ofd.ShowDialog();
             if (res == DialogResult.OK)
@@ -29,7 +29,7 @@ namespace Retempo2
         public static string? GetBeatmapSaveFname()
         {
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Beatmap files(*.rtbm)|*.RTBM|All files (*.*)|*.*";
+            sfd.Filter = "Beatmap files (*.rtbm)|*.rtbm|All files (*.*)|*.*";
             sfd.RestoreDirectory = true;
             DialogResult res = sfd.ShowDialog();
             if (res == DialogResult.OK)

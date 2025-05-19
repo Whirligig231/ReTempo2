@@ -8,6 +8,11 @@
             {
                 using (BinaryWriter bw = new BinaryWriter(fs))
                 {
+                    bw.Write('R');
+                    bw.Write('T');
+                    bw.Write('B');
+                    bw.Write('M');
+                    bw.Write(1);
                     bw.Write(samples.Length);
                     foreach (float sample in samples)
                     {
@@ -31,6 +36,16 @@
             {
                 using (BinaryReader br = new BinaryReader(fs))
                 {
+                    if (br.ReadChar() != 'R')
+                        throw new IOException();
+                    if (br.ReadChar() != 'T')
+                        throw new IOException();
+                    if (br.ReadChar() != 'B')
+                        throw new IOException();
+                    if (br.ReadChar() != 'M')
+                        throw new IOException();
+                    if (br.ReadInt32() != 1)
+                        throw new IOException();
                     int numSamples = br.ReadInt32();
                     for (int i = 0; i < numSamples; i++)
                     {
