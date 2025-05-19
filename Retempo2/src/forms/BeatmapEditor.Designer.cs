@@ -448,6 +448,7 @@
             showREADMEToolStripMenuItem.ShortcutKeys = Keys.F1;
             showREADMEToolStripMenuItem.Size = new Size(180, 22);
             showREADMEToolStripMenuItem.Text = "Show &README";
+            showREADMEToolStripMenuItem.Click += showREADMEToolStripMenuItem_Click;
             // 
             // toolStripSeparator6
             // 

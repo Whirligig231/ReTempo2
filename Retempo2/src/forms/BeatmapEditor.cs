@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using PortAudioSharp;
+using Retempo2.src.forms;
 using Timer = System.Windows.Forms.Timer;
 
 namespace Retempo2
@@ -1282,6 +1283,12 @@ namespace Retempo2
         {
             if (!CheckDirty())
                 e.Cancel = true;
+        }
+
+        private void showREADMEToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form form = new HelpDialog();
+            form.ShowDialog();
         }
     }
 }
