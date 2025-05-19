@@ -1288,6 +1288,12 @@ namespace Retempo2
         private void showREADMEToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form form = new HelpDialog();
+            form.Show();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form form = new AboutDialog();
             form.ShowDialog();
         }
     }
