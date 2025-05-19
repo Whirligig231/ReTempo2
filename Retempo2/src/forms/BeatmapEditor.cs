@@ -46,7 +46,7 @@ namespace Retempo2
         public BeatmapEditor()
         {
             InitializeComponent();
-            Version.ConvertForm(this);
+            Version.ConvertControl(this);
             aStream = new AudioStream();
             AudioVisScroll.Maximum = 0;
 

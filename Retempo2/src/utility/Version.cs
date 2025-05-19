@@ -12,9 +12,9 @@ namespace Retempo2
             return value.Replace("{VERSION}", Get());
         }
 
-        public static void ConvertForm(Form form)
+        public static void ConvertControl(Control control)
         {
-            form.Text = form.Text.Replace("{VERSION}", Get());
+            control.Text = control.Text.Replace("{VERSION}", Get());
         }
     }
 }
