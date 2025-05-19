@@ -95,6 +95,19 @@ namespace Retempo2
 
         }
 
+        private bool IsDirty()
+        {
+            return (undoCurrentIndex != undoSavedIndex);
+        }
+
+        private void UpdateDirty()
+        {
+            if (Text.EndsWith("*") && !IsDirty())
+                Text = Text.Substring(0, Text.Length - 1);
+            if (!Text.EndsWith("*") && IsDirty())
+                Text += "*";
+        }
+
         private void SeekToStart()
         {
             bool playing = aStream.IsPlaying();
@@ -277,11 +290,13 @@ namespace Retempo2
             undoCurrentIndex = 0;
             undoSavedIndex = 0;
             undoHistory.Clear();
+            UpdateDirty();
         }
 
         private void MarkUndoHistoryAsSaved()
         {
             undoSavedIndex = undoCurrentIndex;
+            UpdateDirty();
         }
 
         private void AddToUndoHistory(IEnumerable<float> added, IEnumerable<float> removed)
@@ -295,6 +310,7 @@ namespace Retempo2
 
             undoHistory.Add(newEntry);
             undoCurrentIndex++;
+            UpdateDirty();
         }
 
         private void Undo()
@@ -324,6 +340,7 @@ namespace Retempo2
             }
 
             AudioVis.Refresh();
+            UpdateDirty();
         }
 
         private void Redo()
@@ -353,6 +370,7 @@ namespace Retempo2
             undoCurrentIndex++;
 
             AudioVis.Refresh();
+            UpdateDirty();
         }
 
         private void TrimBeatmap()
