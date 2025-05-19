@@ -15,6 +15,8 @@ namespace Retempo2
         private int undoCurrentIndex; // Most recent state that hasn't been executed
         private int undoSavedIndex; // Most recent state that hasn't been saved
 
+        private string? saveFname; // File name to save to
+
         private AudioStream aStream; // The internal audio stream
         private string? audioFname; // Name of the audio file
         private float[]? audioFileSamples; // The audio data
@@ -369,19 +371,14 @@ namespace Retempo2
             }
         }
 
-        private void ReplaceSample(string? fname)
+        private void SetupSample()
         {
-            if (fname == null)
-                return;
-            audioFname = fname;
-            audioFileSamples = AudioFileHandling.LoadMFRFile(fname);
             if (audioFileSamples == null)
             {
                 AudioVis.Refresh();
                 return;
             }
             audioDataEmm = null;
-            AudioVis.Refresh();
             audioDataEmm = new EfficientMinMax(audioFileSamples, 2); // TODO: Support for other numbers of channels?
 
             if (startFrame + numFrames > audioDataEmm.GetLength())
@@ -394,6 +391,7 @@ namespace Retempo2
                 beatmap = [];
             else
                 TrimBeatmap();
+
             generator = new ArrayWithBeatsGenerator(audioFileSamples, beatmap, clickSoundSamples);
             aStream.SetCallback(generator.Callback);
 
@@ -403,6 +401,15 @@ namespace Retempo2
             AudioVis.Refresh();
         }
 
+        private void ReplaceSample(string? fname)
+        {
+            if (fname == null)
+                return;
+            audioFname = fname;
+            audioFileSamples = AudioFileHandling.LoadMFRFile(fname);
+            SetupSample();
+        }
+
         private void LoadNewSample()
         {
             if (audioFname == null)
@@ -410,7 +417,7 @@ namespace Retempo2
                 CreateNewDocument();
                 return;
             }
-            string? fname = DialogSupport.GetAudioFname();
+            string? fname = DialogSupport.GetAudioOpenFname();
             ReplaceSample(fname);
         }
 
@@ -424,7 +431,7 @@ namespace Retempo2
 
         private void CreateNewDocument()
         {
-            string? fname = DialogSupport.GetAudioFname();
+            string? fname = DialogSupport.GetAudioOpenFname();
             if (fname == null)
                 return;
             ReplaceSample(fname);
@@ -440,8 +447,63 @@ namespace Retempo2
             playhead[1] = 0;
 
             ClearUndoHistory();
+            saveFname = null;
 
             AudioVis.Refresh();
+        }
+
+        private void LoadDocumentFromFile(string fname)
+        {
+            float[] beats;
+            BeatmapFiles.LoadBeatmapFromFile(fname, out audioFileSamples, out beats);
+            beatmap = new List<float>(beats);
+            SetupSample();
+
+            startFrame = 0;
+            numFrames = audioDataEmm!.GetLength();
+            playhead[0] = 0;
+            playhead[1] = 0;
+
+            saveFname = fname;
+            ClearUndoHistory();
+
+            AudioVis.Refresh();
+        }
+
+        private void SaveDocumentToFile(string fname)
+        {
+            if (audioFileSamples == null)
+                return;
+            if (beatmap == null)
+                return;
+            BeatmapFiles.SaveBeatmapToFile(fname, audioFileSamples, beatmap.ToArray());
+            MarkUndoHistoryAsSaved();
+        }
+
+        private void OpenFile()
+        {
+            string? fname = DialogSupport.GetBeatmapOpenFname();
+            if (fname == null)
+                return;
+            LoadDocumentFromFile(fname);
+        }
+
+        private void SaveFile()
+        {
+            string? fname = saveFname;
+            if (fname == null)
+                fname = DialogSupport.GetBeatmapSaveFname();
+            if (fname == null)
+                return;
+            SaveDocumentToFile(fname);
+        }
+
+        private void SaveAsFile()
+        {
+            string? fname = DialogSupport.GetBeatmapSaveFname();
+            if (fname == null)
+                return;
+            SaveDocumentToFile(fname);
         }
 
         private void OpenButton_Click(object sender, EventArgs e)
@@ -1152,6 +1214,21 @@ namespace Retempo2
         private void redoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Redo();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFile();
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFile();
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveAsFile();
         }
     }
 }
