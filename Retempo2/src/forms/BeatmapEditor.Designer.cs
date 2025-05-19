@@ -446,18 +446,18 @@
             // 
             showREADMEToolStripMenuItem.Name = "showREADMEToolStripMenuItem";
             showREADMEToolStripMenuItem.ShortcutKeys = Keys.F1;
-            showREADMEToolStripMenuItem.Size = new Size(171, 22);
+            showREADMEToolStripMenuItem.Size = new Size(180, 22);
             showREADMEToolStripMenuItem.Text = "Show &README";
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(168, 6);
+            toolStripSeparator6.Size = new Size(177, 6);
             // 
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(171, 22);
+            aboutToolStripMenuItem.Size = new Size(180, 22);
             aboutToolStripMenuItem.Text = "&About...";
             // 
             // BeatmapEditor
@@ -477,7 +477,7 @@
             KeyPreview = true;
             MainMenuStrip = MenuStrip;
             Name = "BeatmapEditor";
-            Text = "Retempo 2 {VERSION} - Beatmap Editor";
+            Text = "ReTempo 2 {VERSION} - Beatmap Editor";
             FormClosing += BeatmapEditor_FormClosing;
             Load += BeatmapEditor_Load;
             KeyDown += BeatmapEditor_KeyDown;
