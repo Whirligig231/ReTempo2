@@ -108,6 +108,21 @@ namespace Retempo2
                 Text += "*";
         }
 
+        private bool CheckDirty()
+        {
+            if (!IsDirty())
+                return true;
+            int dirtyDialog = DialogSupport.DirtyDialog();
+            if (dirtyDialog == 2)
+            {
+                SaveFile();
+                return true;
+            }
+            if (dirtyDialog == 1)
+                return true;
+            return false;
+        }
+
         private void SeekToStart()
         {
             bool playing = aStream.IsPlaying();
@@ -449,6 +464,9 @@ namespace Retempo2
 
         private void CreateNewDocument()
         {
+            if (!CheckDirty())
+                return;
+
             string? fname = DialogSupport.GetAudioOpenFname();
             if (fname == null)
                 return;
@@ -488,32 +506,36 @@ namespace Retempo2
             AudioVis.Refresh();
         }
 
-        private void SaveDocumentToFile(string fname)
+        private bool SaveDocumentToFile(string fname)
         {
             if (audioFileSamples == null)
-                return;
+                return false;
             if (beatmap == null)
-                return;
+                return false;
             BeatmapFiles.SaveBeatmapToFile(fname, audioFileSamples, beatmap.ToArray());
             MarkUndoHistoryAsSaved();
+            return true;
         }
 
         private void OpenFile()
         {
+            if (!CheckDirty())
+                return;
+
             string? fname = DialogSupport.GetBeatmapOpenFname();
             if (fname == null)
                 return;
             LoadDocumentFromFile(fname);
         }
 
-        private void SaveFile()
+        private bool SaveFile()
         {
             string? fname = saveFname;
             if (fname == null)
                 fname = DialogSupport.GetBeatmapSaveFname();
             if (fname == null)
-                return;
-            SaveDocumentToFile(fname);
+                return false;
+            return SaveDocumentToFile(fname);
         }
 
         private void SaveAsFile()
@@ -522,6 +544,13 @@ namespace Retempo2
             if (fname == null)
                 return;
             SaveDocumentToFile(fname);
+        }
+
+        private void CloseWindow()
+        {
+            if (!CheckDirty())
+                return;
+            Close();
         }
 
         private void OpenButton_Click(object sender, EventArgs e)
@@ -1201,7 +1230,7 @@ namespace Retempo2
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Close();
+            CloseWindow();
         }
 
         private void cutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1247,6 +1276,12 @@ namespace Retempo2
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveAsFile();
+        }
+
+        private void BeatmapEditor_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!CheckDirty())
+                e.Cancel = true;
         }
     }
 }

@@ -37,5 +37,18 @@ namespace Retempo2
             else
                 return null;
         }
+
+        // 0 = cancel
+        // 1 = proceed
+        // 2 = save first
+        public static int DirtyDialog()
+        {
+            DialogResult result = MessageBox.Show("Unsaved changes--would you like to save?", null, MessageBoxButtons.YesNoCancel);
+            if (result == DialogResult.Yes)
+                return 2;
+            if (result == DialogResult.No)
+                return 1;
+            return 0;
+        }
     }
 }

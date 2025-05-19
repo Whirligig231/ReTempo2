@@ -479,6 +479,7 @@
             Name = "BeatmapEditor";
             Text = "Retempo 2 {VERSION} - Beatmap Editor";
             Load += BeatmapEditor_Load;
+            FormClosing += BeatmapEditor_FormClosing;
             KeyDown += BeatmapEditor_KeyDown;
             MouseWheel += BeatmapEditor_MouseWheel;
             ((System.ComponentModel.ISupportInitialize)AudioVis).EndInit();
@@ -486,11 +487,6 @@
             MenuStrip.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
-        }
-
-        private void AudioVis_Paint1(object sender, PaintEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion
