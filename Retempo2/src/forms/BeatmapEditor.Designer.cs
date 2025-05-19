@@ -114,8 +114,8 @@
             // 
             // AudioVis
             // 
-            AudioVis.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            AudioVis.Location = new Point(12, 150);
+            AudioVis.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            AudioVis.Location = new Point(12, 97);
             AudioVis.Name = "AudioVis";
             AudioVis.Size = new Size(600, 200);
             AudioVis.TabIndex = 3;
@@ -128,8 +128,8 @@
             // 
             // AudioVisScroll
             // 
-            AudioVisScroll.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            AudioVisScroll.Location = new Point(12, 353);
+            AudioVisScroll.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            AudioVisScroll.Location = new Point(12, 300);
             AudioVisScroll.Name = "AudioVisScroll";
             AudioVisScroll.Size = new Size(600, 17);
             AudioVisScroll.TabIndex = 4;
@@ -464,7 +464,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(624, 441);
+            ClientSize = new Size(624, 322);
             Controls.Add(AutoTempoButton);
             Controls.Add(ManualTempoButton);
             Controls.Add(SeekStartButton);
@@ -478,8 +478,8 @@
             MainMenuStrip = MenuStrip;
             Name = "BeatmapEditor";
             Text = "Retempo 2 {VERSION} - Beatmap Editor";
-            Load += BeatmapEditor_Load;
             FormClosing += BeatmapEditor_FormClosing;
+            Load += BeatmapEditor_Load;
             KeyDown += BeatmapEditor_KeyDown;
             MouseWheel += BeatmapEditor_MouseWheel;
             ((System.ComponentModel.ISupportInitialize)AudioVis).EndInit();
